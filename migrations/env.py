@@ -24,7 +24,7 @@ with app.app_context():
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+# target_metadata = None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
