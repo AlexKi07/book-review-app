@@ -1,19 +1,24 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from app import db
 
 
-class UserBookList(db.Model):
-    __tablename__ = 'user_book_lists'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
-    status = db.Column(db.String(20), nullable=False)  # e.g., "Want to Read", "Read", "Currently Reading"
 
-    user = db.relationship('User', back_populates='book_lists')
-    book = db.relationship('Book', back_populates='user_lists')
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)  # <- NEW
+
+    reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
+    ratings = db.relationship('Rating', back_populates='user', cascade='all, delete-orphan')
+    comments = db.relationship('Comment', back_populates='user', cascade='all, delete-orphan')
+    book_lists = db.relationship('UserBookList', back_populates='user', cascade='all, delete-orphan')
 
     def __repr__(self):
-        return f'<UserBookList {self.user_id} - {self.book_id} - {self.status}>'
+        return f'<User {self.username}>'
 
 
 # User Model
