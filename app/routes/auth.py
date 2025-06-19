@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
+from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from app.models.models import User, db
+from app.extensions import mail
 
 auth = Blueprint('auth', __name__)
 
-# Helper: Validate required fields
+
 def validate_fields(data, required):
     missing = [field for field in required if not data.get(field)]
     if missing:
@@ -49,6 +51,18 @@ def login():
         return jsonify({"error": "Invalid email or password"}), 401
 
     access_token = create_access_token(identity=user.id)
+
+    # email section
+    try:
+        msg = Message(
+            subject="Login Notification",
+            recipients=[user.email],
+            body=f"Hello {user.username},\n\nYou successfully logged into your Book Review account."
+        )
+        mail.send(msg)
+    except Exception as e:
+        print("EMAIL ERROR:", e)  # Don’t fail login even if email fails
+
     return jsonify({
         "access_token": access_token,
         "user_id": user.id,

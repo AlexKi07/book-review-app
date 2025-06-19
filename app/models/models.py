@@ -1,36 +1,19 @@
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from app import db
-
+from app.extensions import db 
 
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
+    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)  # <- NEW
 
-    reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
-    ratings = db.relationship('Rating', back_populates='user', cascade='all, delete-orphan')
-    comments = db.relationship('Comment', back_populates='user', cascade='all, delete-orphan')
-    book_lists = db.relationship('UserBookList', back_populates='user', cascade='all, delete-orphan')
-
-    def __repr__(self):
-        return f'<User {self.username}>'
-
-
-# User Model
-class User(db.Model):
-    __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
     bio = db.Column(db.Text)
     profile_picture = db.Column(db.String(200))
     favorite_genres = db.Column(db.Text)
+    is_admin = db.Column(db.Boolean, default=False)
 
     reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
     ratings = db.relationship('Rating', back_populates='user', cascade='all, delete-orphan')
@@ -41,9 +24,9 @@ class User(db.Model):
         return f'<User {self.username}>'
 
 
-# Book Model
 class Book(db.Model):
     __tablename__ = 'books'
+    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(200), nullable=False)
     author = db.Column(db.String(100), nullable=False)
@@ -59,9 +42,9 @@ class Book(db.Model):
         return f'<Book {self.title}>'
 
 
-# Review Model
 class Review(db.Model):
     __tablename__ = 'reviews'
+    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
@@ -75,11 +58,11 @@ class Review(db.Model):
         return f'<Review {self.id} by User {self.user_id}>'
 
 
-# Rating Model
 class Rating(db.Model):
     __tablename__ = 'ratings'
+    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    score = db.Column(db.Integer, nullable=False)  # Rating 1-5
+    score = db.Column(db.Integer, nullable=False)  # 1-5
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
@@ -90,9 +73,9 @@ class Rating(db.Model):
         return f'<Rating {self.score} by User {self.user_id}>'
 
 
-# Comment Model
 class Comment(db.Model):
     __tablename__ = 'comments'
+    
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=False)
     review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
@@ -105,3 +88,18 @@ class Comment(db.Model):
 
     def __repr__(self):
         return f'<Comment {self.id} by User {self.user_id}>'
+
+
+class UserBookList(db.Model):
+    __tablename__ = 'user_book_lists'
+    
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
+    status = db.Column(db.String(20), nullable=False)  # e.g., "Want to Read", etc.
+
+    user = db.relationship('User', back_populates='book_lists')
+    book = db.relationship('Book', back_populates='user_lists')
+
+    def __repr__(self):
+        return f'<UserBookList {self.user_id} - {self.book_id} - {self.status}>'

@@ -1,6 +1,7 @@
 from .auth import auth
 from .books import books
 from .comments import comments
+from .email import email_bp
 from .reviews import reviews
 from .ratings import ratings
 from .users import users
@@ -14,3 +15,5 @@ def register_blueprints(app):
     app.register_blueprint(ratings, url_prefix='/ratings')
     app.register_blueprint(users, url_prefix='/users')
     app.register_blueprint(userlist, url_prefix='/list')
+    app.register_blueprint(email_bp, url_prefix='/email')
+
