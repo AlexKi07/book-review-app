@@ -23,6 +23,18 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.username}>'
 
+    def to_json(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "email": self.email,
+            "bio": self.bio,
+            "profile_picture": self.profile_picture,
+            "favorite_genres": self.favorite_genres,
+            "is_admin": self.is_admin
+        }
+
+
 
 class Book(db.Model):
     __tablename__ = 'books'
@@ -78,9 +90,9 @@ class Comment(db.Model):
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     content = db.Column(db.Text, nullable=False)
-    review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
-    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    book_id = db.Column(db.Integer, db.ForeignKey('books.id'), nullable=False)
+    review_id = db.Column(db.Integer, db.ForeignKey('reviews.id'), nullable=False)
 
     review = db.relationship('Review', back_populates='comments')
     book = db.relationship('Book', back_populates='comments')

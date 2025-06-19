@@ -6,13 +6,37 @@ comments = Blueprint('comments', __name__)
 
 @comments.route('/comments', methods=['POST'])
 @jwt_required()
-def create_comment():
-    data = request.json
+def post_comment():
+    data = request.get_json()
     user_id = get_jwt_identity()
-    comment = Comment(content=data['content'], review_id=data['review_id'], user_id=user_id)
+
+    content = data.get('content')
+    book_id = data.get('book_id')
+    review_id = data.get('review_id')
+
+    if not all([content, book_id, review_id]):
+        return jsonify({"error": "Missing content, book_id, or review_id"}), 400
+
+    comment = Comment(
+        content=content,
+        user_id=user_id,
+        book_id=book_id,
+        review_id=review_id
+    )
     db.session.add(comment)
     db.session.commit()
-    return jsonify({"msg": "Comment added!", "id": comment.id})
+
+    return jsonify({
+        "message": "Comment posted successfully",
+        "comment": {
+            "id": comment.id,
+            "content": comment.content,
+            "book_id": comment.book_id,
+            "review_id": comment.review_id,
+            "user_id": comment.user_id
+        }
+    }), 201
+
 
 @comments.route('/comments/<int:comment_id>', methods=['PUT'])
 @jwt_required()
