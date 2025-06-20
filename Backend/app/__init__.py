@@ -2,7 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
 
-from config import Config
+from Backend.config import Config
 from app.extensions import db, mail
 from app.models.models import User  
 
