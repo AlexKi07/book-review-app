@@ -36,6 +36,7 @@ class User(db.Model, UserMixin):
 
 
 
+
 class Book(db.Model):
     __tablename__ = 'books'
     

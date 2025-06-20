@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.models.models import User, db
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+
 users = Blueprint('users', __name__)
 
 @users.route('/users', methods=['GET'])
@@ -35,3 +36,18 @@ def update_user(user_id):
 
     db.session.commit()
     return jsonify(user.to_json()), 200
+
+@users.route('/me', methods=['GET'])
+@jwt_required()
+def get_current_user():
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(user_id)
+
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "bio": user.bio,
+        "profile_picture": user.profile_picture,
+        "favorite_genres": user.favorite_genres
+    }), 200

@@ -1,11 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_mail import Message
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (
+    create_access_token,
+    jwt_required,
+    get_jwt_identity,
+    get_jwt
+)
 from app.models.models import User, db
 from app.extensions import mail
 
 auth = Blueprint('auth', __name__)
+jwt_blacklist = set()  # Set to store revoked tokens
 
 
 def validate_fields(data, required):
@@ -52,7 +58,7 @@ def login():
 
     access_token = create_access_token(identity=user.id)
 
-    # email section
+    # Send login email
     try:
         msg = Message(
             subject="Login Notification",
@@ -61,10 +67,23 @@ def login():
         )
         mail.send(msg)
     except Exception as e:
-        print("EMAIL ERROR:", e)  # Don’t fail login even if email fails
+        print("EMAIL ERROR:", e)  
 
     return jsonify({
         "access_token": access_token,
         "user_id": user.id,
         "username": user.username
     }), 200
+
+
+@auth.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    jti = get_jwt()["jti"]
+    jwt_blacklist.add(jti)
+    return jsonify({"msg": "Successfully logged out"}), 200
+
+
+# Optional helper for token verification
+def is_token_revoked(jwt_payload):
+    return jwt_payload["jti"] in jwt_blacklist

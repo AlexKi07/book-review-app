@@ -12,3 +12,6 @@ class Config:
     MAIL_USERNAME = 'examplesalex@gmail.com'
     MAIL_PASSWORD = 'zuol ijwg eeik uwix'  
     MAIL_DEFAULT_SENDER = 'examplesalex@gmail.com'
+
+    JWT_BLACKLIST_ENABLED = True
+    JWT_BLACKLIST_TOKEN_CHECKS = ["access", "refresh"]
