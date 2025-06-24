@@ -1,3 +1,4 @@
+// src/App.jsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
@@ -6,20 +7,52 @@ import Books from "./pages/Books";
 import Profile from "./pages/Profile";
 import BookDetail from "./pages/BookDetail";
 import NotFound from "./pages/NotFound";
+import PrivateRoute from "./components/PrivateRoute";
+import { AuthProvider } from "./context/AuthContext";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LoginForm />} />
-        <Route path="/register" element={<RegisterForm />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/books" element={<Books />} />
-        <Route path="/books/:id" element={<BookDetail />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/books"
+            element={
+              <PrivateRoute>
+                <Books />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/books/:id"
+            element={
+              <PrivateRoute>
+                <BookDetail />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

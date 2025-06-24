@@ -1,37 +1,59 @@
 // src/components/RegisterForm.jsx
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
+import { registerUser, loginUser } from "../api";
+import { useAuth } from "../context/AuthContext";
 
 export default function RegisterForm() {
-  const [formData, setFormData] = useState({ username: "", email: "", password: "" });
+  const { user, login } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  if (user) return <Navigate to="/dashboard" replace />; // prevent access if logged in
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    const res = await fetch("http://127.0.0.1:5000/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-    if (res.ok) {
-      alert("Registered! Now log in.");
-      navigate("/");
-    } else {
-      const data = await res.json();
-      alert(data.error || "Registration failed");
+    setError("");
+
+    try {
+      await registerUser({ username, email, password });
+      const data = await loginUser({ email, password }); // auto-login after register
+      login(data);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Registration failed.");
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit}>
       <h2>Register</h2>
-      <input name="username" placeholder="Username" onChange={handleChange} required />
-      <input name="email" placeholder="Email" onChange={handleChange} required />
-      <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <input
+        type="text"
+        placeholder="Username"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        required
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
       <button type="submit">Register</button>
     </form>
   );
