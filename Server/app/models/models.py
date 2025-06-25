@@ -116,3 +116,10 @@ class UserBookList(db.Model):
 
     def __repr__(self):
         return f'<UserBookList {self.user_id} - {self.book_id} - {self.status}>'
+
+
+from flask import Flask
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)  # <-- Enables CORS for all routes

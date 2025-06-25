@@ -1,5 +1,5 @@
 // src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
@@ -10,6 +10,9 @@ import BookDetail from "./pages/BookDetail";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
+import Layout from "./components/Layout";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -32,47 +35,26 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Navbar isLoggedIn={!!user} onLogout={handleLogout} />
+      
       <Routes>
-        <Route path="/" element={<LoginForm onLogin={setUser} />} />
+        <Route path="/" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
 
         <Route
-          path="/dashboard"
           element={
-            <PrivateRoute user={user}>
-              <Dashboard />
+            <PrivateRoute>
+              <Layout />
             </PrivateRoute>
           }
-        />
-        <Route
-          path="/books"
-          element={
-            <PrivateRoute user={user}>
-              <Books />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/books/:id"
-          element={
-            <PrivateRoute user={user}>
-              <BookDetail />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <PrivateRoute user={user}>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
+        >
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/books" element={<Books />} />
+          <Route path="/books/:id" element={<BookDetail />} />
+          <Route path="/profile" element={<Profile />} />
+        </Route>
+
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </BrowserRouter>
   );
 }
 

@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
-
-from Backend.config import Config
+from flask_cors import CORS
+from config import Config
 from app.extensions import db, mail
 from app.models.models import User  
 
@@ -18,6 +18,7 @@ def create_app():
     mail.init_app(app)
     login_manager.init_app(app)
     jwt.init_app(app)
+    CORS(app)
 
     from app.extensions import jwt_blacklist
 
