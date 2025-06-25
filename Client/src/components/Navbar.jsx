@@ -16,13 +16,13 @@ function Navbar({ isLoggedIn, onLogout }) {
     : [{ to: "/register", label: "Register" }];
 
   const handleLogout = () => {
-    onLogout(); // clears token and resets user in App.jsx
+    onLogout(); 
     setMobileMenuOpen(false);
-    navigate("/"); // redirect to login
+    navigate("/");
   };
 
   return (
-    <nav className="bg-gray-800">
+    <nav className="bg-blue-900">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           {/* Mobile menu button */}
@@ -51,8 +51,9 @@ function Navbar({ isLoggedIn, onLogout }) {
 
           {/* Logo and desktop menu */}
           <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex shrink-0 items-center">
-              <img className="h-8 w-auto" src="https://tailwindcss.com/_next/static/media/mark.6b7f0211.svg" alt="Logo" />
+            <div className="flex flex-row gap-4 items-center">
+              <img className="h-8 w-auto" src="/ReviewCornerLogo.jpg" alt="Logo" />
+              <h1 className="text-white">ReviewCorner </h1>
             </div>
 
             {isLoggedIn && (

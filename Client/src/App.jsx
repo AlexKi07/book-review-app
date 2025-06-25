@@ -1,6 +1,8 @@
 // src/App.jsx
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Dashboard from "./pages/Dashboard";
@@ -9,10 +11,10 @@ import Profile from "./pages/Profile";
 import BookDetail from "./pages/BookDetail";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
-import Navbar from "./components/Navbar";
 import Layout from "./components/Layout";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
+import "./index.css";
+import Navbar from "./components/Navbar";
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -35,7 +37,9 @@ function App() {
   };
 
   return (
-      
+    
+    <>
+     
       <Routes>
         <Route path="/" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
@@ -55,6 +59,7 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      </>
   );
 }
 
