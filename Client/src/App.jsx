@@ -11,6 +11,8 @@ import Profile from "./pages/Profile";
 import BookDetail from "./pages/BookCatalog";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
+import AdminRoute from "./routes/AdminRoute";
+import AdminDashboard from "./pages/AdminDashboard";
 import Layout from "./components/Layout";
 import EditProfileForm from "./components/EditProfileForm";
 import "./index.css";
@@ -59,6 +61,12 @@ function App() {
           <Route path="/books/:id" element={<BookDetail />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
+
+        <Route path="/admin" element={
+    <AdminRoute>
+      <AdminDashboard />
+    </AdminRoute>
+  } />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

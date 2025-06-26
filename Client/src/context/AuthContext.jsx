@@ -6,40 +6,39 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // ✅ avoid flash-redirect
   const navigate = useNavigate();
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      const storedToken = localStorage.getItem('access_token');
-      
-      if (storedUser && storedToken) {
+    const token = localStorage.getItem('access_token');
+    const storedUser = localStorage.getItem('user');
+
+    if (token && storedUser) {
+      try {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setIsAuthenticated(true);
+      } catch (error) {
+        console.error('Failed to parse user:', error);
+        logout(); // clear bad data
       }
-    } catch (error) {
-      console.error('Failed to parse user data:', error);
-      logout(); // Clear invalid data
     }
+
+    setIsLoadingAuth(false); // ✅ finished loading
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch('http://localhost:5000/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // ✅ allow cookie-based sessions if needed
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
+      if (!response.ok) throw new Error('Login failed');
       const data = await response.json();
-      
+
       if (!data.access_token || !data.user) {
         throw new Error('Invalid server response');
       }
@@ -47,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refresh_token || '');
       localStorage.setItem('user', JSON.stringify(data.user));
-      
+
       setUser(data.user);
       setIsAuthenticated(true);
       navigate('/dashboard');
@@ -68,7 +67,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated,
+        isLoadingAuth, // expose for route protection
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
