@@ -51,3 +51,53 @@ def get_current_user():
         "profile_picture": user.profile_picture,
         "favorite_genres": user.favorite_genres
     }), 200
+
+@users.route('/me', methods=['PATCH'])
+@jwt_required()
+def update_current_user():
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(user_id)
+    
+    data = request.get_json()
+    
+    if not data:
+        return jsonify({"message": "No input data provided"}), 400
+    
+    if 'username' in data:
+        if User.query.filter_by(username=data['username']).first() and data['username'] != user.username:
+            return jsonify({"message": "Username already taken"}), 400
+        user.username = data['username']
+    
+    if 'email' in data:
+        if User.query.filter_by(email=data['email']).first() and data['email'] != user.email:
+            return jsonify({"message": "Email already in use"}), 400
+        user.email = data['email']
+    
+    if 'bio' in data:
+        user.bio = data['bio']
+    
+    if 'profile_picture' in data:
+        user.profile_picture = data['profile_picture']
+    
+    if 'favorite_genres' in data:
+        if isinstance(data['favorite_genres'], str):
+            user.favorite_genres = [genre.strip() for genre in data['favorite_genres'].split(',') if genre.strip()]
+        else:
+            user.favorite_genres = data['favorite_genres']
+    
+    try:
+        db.session.commit()
+        return jsonify({
+            "message": "Profile updated successfully",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "bio": user.bio,
+                "profile_picture": user.profile_picture,
+                "favorite_genres": user.favorite_genres
+            }
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Failed to update profile", "error": str(e)}), 500
