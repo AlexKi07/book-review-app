@@ -1,26 +1,24 @@
 // src/pages/Books.jsx
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import BookCard from "../components/BookCard";
 
-export default function Books() {
+function Books() {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/books")
+    fetch("http://localhost:5000/books/books")
       .then((res) => res.json())
-      .then(setBooks);
+      .then(setBooks)
+      .catch(console.error);
   }, []);
 
   return (
-    <div>
-      <h2>All Books</h2>
-      <ul>
-        {books.map((book) => (
-          <li key={book.id}>
-            <Link to={`/books/${book.id}`}>{book.title}</Link>
-          </li>
-        ))}
-      </ul>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+      {books.map((book) => (
+        <BookCard key={book.id} book={book} />
+      ))}
     </div>
   );
 }
+
+export default Books;

@@ -7,7 +7,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///bookreviewdb.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-   
+    CORS_ORIGINS = ["http://localhost:5173"]
+
     MAIL_SERVER = 'smtp.gmail.com'
     MAIL_PORT = 587
     MAIL_USE_TLS = True
@@ -22,3 +23,7 @@ class Config:
    
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)  # Access token expires in 24 hour
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)  # Refresh token expires in 30 days
+
+    JWT_TOKEN_LOCATION = ['headers', 'cookies']
+    JWT_COOKIE_SECURE = False  # True in production
+    JWT_COOKIE_SAMESITE = 'Lax'

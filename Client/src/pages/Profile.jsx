@@ -1,23 +1,37 @@
-// src/pages/Profile.jsx
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Profile() {
   const [profile, setProfile] = useState(null);
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const token = userData?.access_token;
+  const { isAuthenticated, isLoadingAuth } = useAuth();
 
   useEffect(() => {
+    if (isLoadingAuth || !isAuthenticated) return;
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      console.error("No access token found.");
+      return;
+    }
+
     fetch("http://localhost:5000/users/me", {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
+      credentials: "include",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        return res.json();
+      })
       .then((data) => setProfile(data))
       .catch((err) => console.error("Failed to fetch profile:", err));
-  }, []);
+  }, [isAuthenticated, isLoadingAuth]);
 
+  if (isLoadingAuth) return <p className="text-center mt-8">Checking authentication...</p>;
+  if (!isAuthenticated) return <p className="text-center mt-8">You must be logged in to view your profile.</p>;
   if (!profile) return <p className="text-center mt-8">Loading profile...</p>;
 
   return (
@@ -42,7 +56,10 @@ function Profile() {
         <p className="text-gray-700">{profile.favorite_genres || "None listed."}</p>
       </div>
       <div className="mt-6 flex justify-end">
-        <Link to="/edit-profile" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 justify-end">
+        <Link
+          to="/edit-profile"
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 justify-end"
+        >
           Edit Profile
         </Link>
       </div>

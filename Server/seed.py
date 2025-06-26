@@ -17,7 +17,13 @@ with app.app_context():
   
     user = User(username='johndoe', email='johndoe@example.com', password_hash=generate_password_hash('plainpassword123'))
     book = Book(title='Running Up The Hill', author='Mike', genre='Motivational')
-
+    admin = User(
+        username='admin',
+        email='admin@example.com',
+        password_hash=generate_password_hash('secretpassword'),
+        is_admin=True
+    )
+    db.session.add(admin)
     db.session.add(user)
     db.session.add(book)
     db.session.commit()

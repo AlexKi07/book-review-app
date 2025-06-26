@@ -6,7 +6,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true); // ✅ avoid flash-redirect
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,12 +19,12 @@ export const AuthProvider = ({ children }) => {
         setUser(parsedUser);
         setIsAuthenticated(true);
       } catch (error) {
-        console.error('Failed to parse user:', error);
-        logout(); // clear bad data
+        console.error('Failed to parse stored user:', error);
+        logout(); 
       }
     }
 
-    setIsLoadingAuth(false); // ✅ finished loading
+    setIsLoadingAuth(false);
   }, []);
 
   const login = async (email, password) => {
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
       const response = await fetch('http://localhost:5000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // ✅ allow cookie-based sessions if needed
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
 
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
 
       if (!data.access_token || !data.user) {
-        throw new Error('Invalid server response');
+        throw new Error('Invalid response from server');
       }
 
       localStorage.setItem('access_token', data.access_token);
@@ -49,7 +49,6 @@ export const AuthProvider = ({ children }) => {
 
       setUser(data.user);
       setIsAuthenticated(true);
-      navigate('/dashboard');
       return true;
     } catch (error) {
       console.error('Login error:', error);
@@ -71,9 +70,11 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         isAuthenticated,
-        isLoadingAuth, // expose for route protection
+        isLoadingAuth,
         login,
         logout,
+        setUser, 
+        setIsAuthenticated, 
       }}
     >
       {children}

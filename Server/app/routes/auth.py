@@ -51,7 +51,9 @@ def is_token_revoked(jwt_payload):
 def register():
     if request.method == 'OPTIONS':
         response = jsonify({})
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.status_code = 204
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
         return response
@@ -63,21 +65,29 @@ def register():
     is_valid, error_msg = validate_input(data, ['username', 'email', 'password'])
     if not is_valid:
         return jsonify({"error": error_msg}), 400
-    
+
     if not data['username'].strip():
         return jsonify({"error": "Username cannot be empty"}), 400
 
-
-    # if User.query.filter_by(email=data['email']).first():
-    #     return jsonify({"error": "Email already registered"}), 409
+    # ✅ Check for duplicate email BEFORE attempting insert
+    if User.query.filter_by(email=data['email']).first():
+        return jsonify({"error": "Email already registered"}), 409
 
     password_hash = generate_password_hash(data['password'])
-    new_user = User(username=data['username'], email=data['email'], password_hash=password_hash)
+    new_user = User(
+        username=data['username'],
+        email=data['email'],
+        password_hash=password_hash
+    )
 
-    db.session.add(new_user)
-    db.session.commit()
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error creating user: {str(e)}")
+        return jsonify({"error": "Something went wrong. Please try again."}), 500
 
-    # Optionally send welcome email
     if current_app.config.get('SEND_WELCOME_EMAILS', True):
         try:
             msg = Message(
@@ -91,14 +101,14 @@ def register():
 
     return jsonify({"message": "User registered successfully"}), 201
 
-
 @auth.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
-        response = jsonify({})
-        response.headers.add('Access-Control-Allow-Origin', '*')
+        response = jsonify({'status': 'preflight'})
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
         response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
         response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
         return response
 
     if not request.is_json:
@@ -176,6 +186,8 @@ def login():
         }
 
         response = jsonify(response_data)
+        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
 
         if current_app.config.get('ENV', '').lower() == 'production':
             response.set_cookie(
@@ -187,13 +199,10 @@ def login():
                 max_age=int(expires_delta.total_seconds())
             )
 
-        print("Login response:", response_data)
         return response
 
     except Exception as e:
-        import traceback
-        current_app.logger.error(f"Login error: {type(e).__name__}: {str(e)}")
-        current_app.logger.error(traceback.format_exc())
+        current_app.logger.error(f"Login error: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
 

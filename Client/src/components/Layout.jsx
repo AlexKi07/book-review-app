@@ -7,7 +7,6 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar isLoggedIn={!!user} onLogout={logout} />
       <main className="p-4">
         <Outlet />
       </main>

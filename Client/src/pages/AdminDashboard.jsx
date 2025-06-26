@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
-  const [reportedReviews, setReportedReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -16,52 +15,40 @@ export default function AdminDashboard() {
       return;
     }
 
-    const fetchData = async () => {
+    const fetchUsers = async () => {
       const token = localStorage.getItem('access_token');
 
       try {
-        const [usersRes, reviewsRes] = await Promise.all([
-          fetch('http://localhost:5000/api/users', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: 'include',
-          }),
-          fetch('http://localhost:5000/api/reported-reviews', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: 'include',
-          }),
-        ]);
+        const res = await fetch('http://localhost:5000/users/users', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-        if (!usersRes.ok || !reviewsRes.ok) throw new Error('Failed to fetch admin data');
+        if (!res.ok) throw new Error('Failed to fetch users');
 
-        setUsers(await usersRes.json());
-        setReportedReviews(await reviewsRes.json());
+        const data = await res.json();
+        setUsers(data);
       } catch (err) {
-        console.error('Admin fetch failed:', err);
+        console.error('Error fetching users:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchUsers();
   }, [user, navigate]);
 
   const handleBanUser = async (userId) => {
     const token = localStorage.getItem('access_token');
-
     try {
-      const res = await fetch(`http://localhost:5000/api/users/${userId}/ban`, {
+      const res = await fetch(`http://localhost:5000/users/users/${userId}/ban`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
       });
-
       if (!res.ok) throw new Error('Failed to ban user');
 
       setUsers((prev) =>
@@ -72,8 +59,28 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUnbanUser = async (userId) => {
+    const token = localStorage.getItem('access_token');
+    try {
+      const res = await fetch(`http://localhost:5000/users/users/${userId}/unban`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) throw new Error('Failed to unban user');
+
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, is_banned: false } : u))
+      );
+    } catch (err) {
+      console.error('Unban failed:', err);
+    }
+  };
+
   if (loading) {
-    return <div className="text-center py-8 text-lg">Loading admin data...</div>;
+    return <div className="text-center py-8 text-lg">Loading users...</div>;
   }
 
   return (
@@ -84,9 +91,6 @@ export default function AdminDashboard() {
         <Tab.List className="flex space-x-1 bg-blue-900/20 p-1 rounded">
           <Tab className="px-4 py-2 rounded ui-selected:bg-white ui-selected:text-blue-700">
             User Management
-          </Tab>
-          <Tab className="px-4 py-2 rounded ui-selected:bg-white ui-selected:text-blue-700">
-            Reported Content
           </Tab>
         </Tab.List>
 
@@ -110,13 +114,20 @@ export default function AdminDashboard() {
                       <td className="py-2 px-4 border">
                         {user.is_banned ? 'Banned' : 'Active'}
                       </td>
-                      <td className="py-2 px-4 border">
-                        {!user.is_banned && (
+                      <td className="py-2 px-4 border space-x-2">
+                        {!user.is_banned ? (
                           <button
                             onClick={() => handleBanUser(user.id)}
                             className="text-red-600 hover:underline"
                           >
                             Ban
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleUnbanUser(user.id)}
+                            className="text-green-600 hover:underline"
+                          >
+                            Unban
                           </button>
                         )}
                       </td>
@@ -125,23 +136,6 @@ export default function AdminDashboard() {
                 </tbody>
               </table>
             </div>
-          </Tab.Panel>
-
-          <Tab.Panel>
-            {reportedReviews.length === 0 ? (
-              <p>No reported reviews.</p>
-            ) : (
-              reportedReviews.map((review) => (
-                <div key={review.id} className="mb-4 p-4 bg-white rounded shadow">
-                  <p className="font-semibold">{review.user.username}'s review</p>
-                  <p className="text-gray-600">{review.content}</p>
-                  <div className="mt-2 flex space-x-4">
-                    <button className="text-red-600 hover:underline">Delete</button>
-                    <button className="text-blue-600 hover:underline">Dismiss</button>
-                  </div>
-                </div>
-              ))
-            )}
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

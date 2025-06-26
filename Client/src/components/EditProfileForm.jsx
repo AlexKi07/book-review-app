@@ -59,32 +59,33 @@ function EditProfileForm() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setServerError(null); 
+    setServerError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-  
+
     try {
-      // Convert genres to array if string
-      const genres = typeof formData.favorite_genres === 'string'
-        ? formData.favorite_genres.split(',').map(g => g.trim()).filter(Boolean)
-        : formData.favorite_genres;
-  
+      // Ensure genres is a clean, comma-separated string
+      const cleanedGenres = formData.favorite_genres
+        .split(",")
+        .map(g => g.trim())
+        .filter(Boolean)
+        .join(", ");
+
       const response = await fetch("http://localhost:5000/users/me", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({
           ...formData,
-          favorite_genres: genres
-        })
+          favorite_genres: cleanedGenres,
+        }),
       });
-  
-      // Handle non-JSON responses
+
       const text = await response.text();
       let data;
       try {
@@ -92,18 +93,20 @@ function EditProfileForm() {
       } catch {
         throw new Error(text || "Update failed");
       }
-  
+
       if (!response.ok) {
         throw new Error(data.error || "Update failed");
       }
-  
+
       toast.success("Profile updated!");
       navigate("/profile");
     } catch (error) {
       console.error("Update error:", error);
-      toast.error(error.message.includes('DOCTYPE') 
-        ? "Server error - check backend configuration"
-        : error.message);
+      toast.error(
+        error.message.includes("DOCTYPE")
+          ? "Server error - check backend configuration"
+          : error.message
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -112,7 +115,7 @@ function EditProfileForm() {
   return (
     <div className="max-w-2xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Edit Profile</h1>
-      
+
       {serverError && (
         <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
           {serverError}

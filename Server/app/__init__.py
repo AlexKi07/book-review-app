@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+import os
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_jwt_extended import JWTManager
@@ -11,19 +12,9 @@ def create_app(config_class=Config):
     """Application factory function"""
     app = Flask(__name__)
     app.config.from_object(config_class)
+    
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
-    # Fix CORS: Move settings out of 'resources' dict
-    CORS(
-        app,
-        resources={r"/api/*": {"origins": app.config.get('CORS_ORIGINS', ["http://localhost:5173"])}},
-        supports_credentials=True,
-        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-        expose_headers=["Content-Type", "Authorization", "X-Total-Count", "Set-Cookie"],
-        max_age=600
-    )
-
-    # JWT Config
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
     app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
@@ -31,6 +22,16 @@ def create_app(config_class=Config):
     app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
     app.config['JWT_COOKIE_CSRF_PROTECT'] = True
     app.config['JWT_CSRF_IN_COOKIES'] = True
+
+    CORS(
+        app,
+        origins=[FRONTEND_URL],
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
+    )
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///your-db-path.db'  # or PostgreSQL/MySQL URL
 
     db.init_app(app)
     mail.init_app(app)
@@ -53,7 +54,6 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
-        
 
     if app.debug:
         @app.route('/debug/jwt-config')
@@ -64,8 +64,12 @@ def create_app(config_class=Config):
                 'jwt_secret_set': bool(app.config.get('JWT_SECRET_KEY')),
                 'jwt_token_location': app.config.get('JWT_TOKEN_LOCATION'),
                 'debug_mode': app.debug,
-                'cors_origins': app.config.get('CORS_ORIGINS')
+                'cors_origins': FRONTEND_URL
             })
+
+    @app.before_request
+    def log_request():
+        print(f">>> {request.method} {request.path}")
 
     @app.errorhandler(404)
     def not_found_error(error):
