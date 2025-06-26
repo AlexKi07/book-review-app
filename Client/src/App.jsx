@@ -12,9 +12,10 @@ import BookDetail from "./pages/BookDetail";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./components/Layout";
+import EditProfileForm from "./components/EditProfileForm";
 
 import "./index.css";
-import Navbar from "./components/Navbar";
+
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -41,7 +42,7 @@ function App() {
     <>
      
       <Routes>
-        <Route path="/" element={<LoginForm />} />
+        <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
 
         <Route
@@ -52,6 +53,7 @@ function App() {
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/edit-profile" element={<EditProfileForm />} />
           <Route path="/books" element={<Books />} />
           <Route path="/books/:id" element={<BookDetail />} />
           <Route path="/profile" element={<Profile />} />

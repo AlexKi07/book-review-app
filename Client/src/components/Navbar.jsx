@@ -1,6 +1,8 @@
 // src/components/Navbar.jsx
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { FiUser } from "react-icons/fi";
+
 
 function Navbar({ isLoggedIn, onLogout }) {
   const location = useLocation();
@@ -79,7 +81,17 @@ function Navbar({ isLoggedIn, onLogout }) {
 
           {/* Logout button */}
           {isLoggedIn && (
-            <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2 gap-3">
+              {/* Profile icon link */}
+              <Link
+                to="/profile"
+                className="text-white hover:text-gray-300 text-xl"
+                title="Profile"
+              >
+                <FiUser />
+              </Link>
+
+              {/* Logout button */}
               <button
                 onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-md text-sm font-medium"

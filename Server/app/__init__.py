@@ -12,6 +12,7 @@ jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
     
     app.config.from_object(Config)
     
@@ -22,7 +23,7 @@ def create_app():
 
     db.init_app(app)
     mail.init_app(app)
-    CORS(app)
+    
     
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'

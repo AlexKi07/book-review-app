@@ -1,86 +1,53 @@
 // src/pages/Profile.jsx
 import { useEffect, useState } from "react";
-import { getProfile, updateProfile } from "../api";
+import { Link } from "react-router-dom";
 
-export default function Profile() {
+function Profile() {
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const token = userData?.access_token;
 
   useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const data = await getProfile();
-        setProfile(data);
-      } catch (err) {
-        setError("Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchProfile();
+    fetch("http://localhost:5000/users/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => setProfile(data))
+      .catch((err) => console.error("Failed to fetch profile:", err));
   }, []);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    try {
-      const updated = await updateProfile(profile);
-      setProfile(updated);
-      alert("Profile updated successfully");
-    } catch (err) {
-      alert("Update failed");
-    }
-  }
-
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setProfile({ ...profile, [name]: value });
-  }
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  if (!profile) return <p className="text-center mt-8">Loading profile...</p>;
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 max-w-xl mx-auto">
-      <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
-      <input
-        className="w-full mb-2 p-2 border"
-        name="username"
-        value={profile.username || ""}
-        onChange={handleChange}
-        placeholder="Username"
-      />
-      <input
-        className="w-full mb-2 p-2 border"
-        name="email"
-        value={profile.email || ""}
-        onChange={handleChange}
-        placeholder="Email"
-      />
-      <textarea
-        className="w-full mb-2 p-2 border"
-        name="bio"
-        value={profile.bio || ""}
-        onChange={handleChange}
-        placeholder="Bio"
-      />
-      <input
-        className="w-full mb-2 p-2 border"
-        name="profile_picture"
-        value={profile.profile_picture || ""}
-        onChange={handleChange}
-        placeholder="Profile Picture URL"
-      />
-      <input
-        className="w-full mb-2 p-2 border"
-        name="favorite_genres"
-        value={profile.favorite_genres || ""}
-        onChange={handleChange}
-        placeholder="Favorite Genres"
-      />
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-        Update Profile
-      </button>
-    </form>
+    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded shadow">
+      <div className="flex items-center gap-4">
+        <img
+          src={profile.profile_picture || "/default-avatar.png"}
+          alt="Profile"
+          className="w-20 h-20 rounded-full object-cover border"
+        />
+        <div>
+          <h2 className="text-xl font-bold">{profile.username}</h2>
+          <p className="text-gray-600">{profile.email}</p>
+        </div>
+      </div>
+      <div className="mt-6">
+        <h3 className="text-lg font-semibold mb-1">Bio:</h3>
+        <p className="text-gray-700">{profile.bio || "No bio yet."}</p>
+      </div>
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold mb-1">Favorite Genres:</h3>
+        <p className="text-gray-700">{profile.favorite_genres || "None listed."}</p>
+      </div>
+      <div className="mt-6 flex justify-end">
+        <Link to="/edit-profile" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 justify-end">
+          Edit Profile
+        </Link>
+      </div>
+    </div>
   );
 }
+
+export default Profile;

@@ -9,7 +9,7 @@ from flask_jwt_extended import (
 )
 from app.models.models import User, db
 from app.extensions import mail
-from app.config import Config
+
 
 auth = Blueprint('auth', __name__)
 jwt_blacklist = set()  # Set to store revoked tokens

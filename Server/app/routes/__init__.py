@@ -6,6 +6,7 @@ from .reviews import reviews
 from .ratings import ratings
 from .users import users
 from .userlist import userlist
+from app.routes.users import users as users_blueprint
 
 
 def register_blueprints(app):
@@ -17,5 +18,6 @@ def register_blueprints(app):
     app.register_blueprint(users, url_prefix='/users')
     app.register_blueprint(userlist, url_prefix='/list')
     app.register_blueprint(email_bp, url_prefix='/email')
+    app.register_blueprint(users_blueprint, url_prefix="/users")
    
 

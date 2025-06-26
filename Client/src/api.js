@@ -14,16 +14,26 @@ function authHeaders() {
 }
 
 export async function loginUser(credentials) {
-  const res = await fetch(`${API_BASE}/auth/login`, {
+  const res = await fetch("http://localhost:5000/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
   });
+
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Login failed");
-  localStorage.setItem("token", data.access_token);
-  return data;
+
+  const userData = {
+    ...data.user,
+    access_token: data.access_token,
+  };
+
+  localStorage.setItem("user", JSON.stringify(userData));
+
+  return userData;
 }
+
+
 
 export async function registerUser(details) {
   const res = await fetch(`${API_BASE}/auth/register`, {
