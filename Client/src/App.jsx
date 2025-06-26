@@ -8,21 +8,26 @@ import RegisterForm from "./components/RegisterForm";
 import Dashboard from "./pages/Dashboard";
 import Books from "./pages/Books";
 import Profile from "./pages/Profile";
-import BookDetail from "./pages/BookDetail";
+import BookDetail from "./pages/BookCatalog";
 import NotFound from "./pages/NotFound";
 import PrivateRoute from "./components/PrivateRoute";
 import Layout from "./components/Layout";
 import EditProfileForm from "./components/EditProfileForm";
-
 import "./index.css";
-
 
 function App() {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      const savedUser = localStorage.getItem("user");
+      if (!savedUser || savedUser === "undefined") return null;
+      return JSON.parse(savedUser);
+    } catch (error) {
+      console.error("Failed to parse user from localStorage", error);
+      localStorage.removeItem("user");
+      return null;
+    }
   });
-
+  
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
@@ -38,16 +43,12 @@ function App() {
   };
 
   return (
-    
-    <>
-     
+    <> 
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
 
-        <Route
-          element={
-            <PrivateRoute>
+        <Route element={<PrivateRoute>
               <Layout />
             </PrivateRoute>
           }

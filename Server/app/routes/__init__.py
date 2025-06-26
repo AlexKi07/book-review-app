@@ -18,6 +18,6 @@ def register_blueprints(app):
     app.register_blueprint(users, url_prefix='/users')
     app.register_blueprint(userlist, url_prefix='/list')
     app.register_blueprint(email_bp, url_prefix='/email')
-    app.register_blueprint(users_blueprint, url_prefix="/users")
+   
    
 

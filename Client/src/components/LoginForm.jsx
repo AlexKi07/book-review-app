@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import { Link } from "react-router-dom";
 import { FiLock, FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
 
 function LoginForm() {
@@ -64,6 +65,7 @@ function LoginForm() {
   };
 
   return (
+    <>
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -127,6 +129,13 @@ function LoginForm() {
         </div>
       </form>
     </div>
+     <p className="mt-4 text-sm">
+     Don't have account?
+       <Link to="/register" className="text-blue-500 hover:underline">
+         Register
+       </Link>
+     </p>
+     </>
   );
 }
 
