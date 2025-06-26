@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime, timezone, timedelta
 from flask import Blueprint, request, jsonify, current_app
 from flask_mail import Message
@@ -62,9 +63,13 @@ def register():
     is_valid, error_msg = validate_input(data, ['username', 'email', 'password'])
     if not is_valid:
         return jsonify({"error": error_msg}), 400
+    
+    if not data['username'].strip():
+        return jsonify({"error": "Username cannot be empty"}), 400
 
-    if User.query.filter_by(email=data['email']).first():
-        return jsonify({"error": "Email already registered"}), 409
+
+    # if User.query.filter_by(email=data['email']).first():
+    #     return jsonify({"error": "Email already registered"}), 409
 
     password_hash = generate_password_hash(data['password'])
     new_user = User(username=data['username'], email=data['email'], password_hash=password_hash)
@@ -104,7 +109,6 @@ def login():
     if not is_valid:
         return jsonify({"error": error_msg}), 400
 
-    # Rate limiting (safe try block)
     login_attempts_key = f"login_attempts:{data['email']}"
     try:
         attempts = int(redis_client.get(login_attempts_key) or 0)
@@ -157,7 +161,7 @@ def login():
             except Exception as e:
                 current_app.logger.error(f"Email sending failed: {str(e)}")
 
-        response = jsonify({
+        response_data = {
             "access_token": access_token,
             "refresh_token": refresh_token,
             "expires_at": expires_at_timestamp,
@@ -169,9 +173,11 @@ def login():
                 "is_admin": user.is_admin
             },
             "message": "Login successful"
-        })
+        }
 
-        if current_app.config.get('ENV') == 'production':
+        response = jsonify(response_data)
+
+        if current_app.config.get('ENV', '').lower() == 'production':
             response.set_cookie(
                 'access_token_cookie',
                 value=access_token,
@@ -181,12 +187,14 @@ def login():
                 max_age=int(expires_delta.total_seconds())
             )
 
-        return response, 200
+        print("Login response:", response_data)
+        return response
 
     except Exception as e:
-        current_app.logger.error(f"Login error: {str(e)}")
+        import traceback
+        current_app.logger.error(f"Login error: {type(e).__name__}: {str(e)}")
+        current_app.logger.error(traceback.format_exc())
         return jsonify({"error": "Internal server error"}), 500
-
 
 
 @auth.route('/logout', methods=['POST'])
