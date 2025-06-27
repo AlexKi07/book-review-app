@@ -9,8 +9,8 @@ function BookList() {
   const fetchBooks = async (query = "") => {
     try {
       const url = query
-        ? `http://localhost:5000/books/books?search=${encodeURIComponent(query)}`
-        : "http://localhost:5000/books/books";
+        ? `https://book-review-app-kgew.onrender.com/books/books?search=${encodeURIComponent(query)}`
+        : "https://book-review-app-kgew.onrender.com/books";
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch books");
       const data = await res.json();

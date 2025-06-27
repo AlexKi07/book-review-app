@@ -8,7 +8,7 @@ export default function AddToList({ bookId }) {
   const handleAdd = async () => {
     if (!status) return;
 
-    const res = await fetch(`http://localhost:5000/users/book-list`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/users/book-list`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

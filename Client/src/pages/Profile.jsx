@@ -29,7 +29,7 @@ function Profile() {
       return;
     }
 
-    fetch("http://localhost:5000/users/me", {
+    fetch("https://book-review-app-kgew.onrender.com/users/me", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${accessToken}`,

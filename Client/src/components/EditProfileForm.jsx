@@ -52,7 +52,7 @@ function EditProfileForm() {
     const fetchUserData = async () => {
       try {
         await delay(300);
-        const res = await fetch("http://localhost:5000/users/me", {
+        const res = await fetch("https://book-review-app-kgew.onrender.com/users/me", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
 
@@ -103,7 +103,7 @@ function EditProfileForm() {
 
       await delay(500);
 
-      const res = await fetch("http://localhost:5000/users/me", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/users/me", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

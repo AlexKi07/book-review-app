@@ -26,7 +26,7 @@ export default function BookForm() {
 
   const fetchUserList = async () => {
     try {
-      const res = await fetch("http://localhost:5000/list/list", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/list/list", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -47,7 +47,7 @@ export default function BookForm() {
     const bookData = { ...formData };
 
     try {
-      const res = await fetch("http://localhost:5000/books/books", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/books/books", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +63,7 @@ export default function BookForm() {
 
       const newBook = await res.json();
 
-      await fetch("http://localhost:5000/list/list", {
+      await fetch("https://book-review-app-kgew.onrender.com/list/list", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -92,7 +92,7 @@ export default function BookForm() {
   const handleDelete = async (id) => {
     if (!window.confirm("Remove this book from your list?")) return;
 
-    const res = await fetch(`http://localhost:5000/list/list/${id}`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/list/list/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ export default function BookForm() {
   };
 
   const handleStatusUpdate = async (id) => {
-    const res = await fetch(`http://localhost:5000/list/list/${id}`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/list/list/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

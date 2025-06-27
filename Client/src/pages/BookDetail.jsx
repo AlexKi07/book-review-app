@@ -24,13 +24,13 @@ function BookDetail() {
   }, [id]);
 
   const refreshBook = async () => {
-    const updated = await fetch(`http://localhost:5000/books/books/${id}`).then((r) => r.json());
+    const updated = await fetch(`https://book-review-app-kgew.onrender.com/books/books/${id}`).then((r) => r.json());
     setBook(updated);
   };
 
   const handleAddToList = async () => {
     try {
-      const res = await fetch("http://localhost:5000/list/list", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/list/list", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -50,7 +50,7 @@ function BookDetail() {
   };
 
   const handleReviewSubmit = async (content) => {
-    const res = await fetch(`http://localhost:5000/books/books/${id}/reviews`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/books/${id}/reviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,7 +63,7 @@ function BookDetail() {
   };
 
   const handleReviewDelete = async (reviewId) => {
-    const res = await fetch(`http://localhost:5000/books/books/${id}/reviews/${reviewId}`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/books/${id}/reviews/${reviewId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -72,7 +72,7 @@ function BookDetail() {
   };
 
   const handleReviewEdit = async () => {
-    const res = await fetch(`http://localhost:5000/books/reviews/${editingReviewId}`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/reviews/${editingReviewId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -89,7 +89,7 @@ function BookDetail() {
   };
 
   const handleRatingSubmit = async () => {
-    const res = await fetch(`http://localhost:5000/books/books/${id}/ratings`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/books/${id}/ratings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -103,7 +103,7 @@ function BookDetail() {
 
   const handleReviewCommentSubmit = async (e, reviewId) => {
     e.preventDefault();
-    const res = await fetch(`http://localhost:5000/books/reviews/${reviewId}/comments`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/reviews/${reviewId}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -119,7 +119,7 @@ function BookDetail() {
   };
 
   const handleReviewCommentDelete = async (reviewId, commentId) => {
-    const res = await fetch(`http://localhost:5000/books/reviews/${reviewId}/comments/${commentId}`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/reviews/${reviewId}/comments/${commentId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });

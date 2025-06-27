@@ -8,7 +8,7 @@ export default function UserBookList() {
 
   const fetchList = async () => {
     try {
-      const res = await fetch("http://localhost:5000/list/list", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/list/list", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -24,7 +24,7 @@ export default function UserBookList() {
 
   const updateStatus = async (itemId, newStatus) => {
     try {
-      const res = await fetch(`http://localhost:5000/list/list/${itemId}`, {
+      const res = await fetch(`https://book-review-app-kgew.onrender.com/list/list/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -40,7 +40,7 @@ export default function UserBookList() {
 
   const deleteItem = async (itemId) => {
     try {
-      const res = await fetch(`http://localhost:5000/list/list/${itemId}`, {
+      const res = await fetch(`https://book-review-app-kgew.onrender.com/list/list/${itemId}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

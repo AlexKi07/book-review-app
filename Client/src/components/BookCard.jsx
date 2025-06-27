@@ -14,7 +14,7 @@ function BookCard({ book }) {
       className="cursor-pointer bg-white rounded-xl shadow-md hover:shadow-lg transition p-4"
     >
       <h2 className="text-lg font-bold">{book.title}</h2>
-      <img src={`http://localhost:5000/uploads/${book.cover_image}`} alt={book.title} />
+      <img src={`https://book-review-app-kgew.onrender.com/uploads/${book.cover_image}`} alt={book.title} />
       <p className="text-sm text-gray-600">by {book.author}</p>
       <p className="text-xs text-gray-500">{book.genre}</p>
     </div>

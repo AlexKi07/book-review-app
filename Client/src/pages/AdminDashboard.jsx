@@ -22,7 +22,7 @@ export default function AdminDashboard() {
       }
   
       try {
-        const res = await fetch('http://localhost:5000/users/users', {
+        const res = await fetch('https://book-review-app-kgew.onrender.com/users/users', {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   const handleBanUser = async (userId) => {
     const token = user?.access_token || JSON.parse(localStorage.getItem('user'))?.access_token;
     try {
-      const res = await fetch(`http://localhost:5000/users/users/${userId}/ban`, {
+      const res = await fetch(`https://book-review-app-kgew.onrender.com/users/users/${userId}/ban`, {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
   const handleUnbanUser = async (userId) => {
     const token = user?.access_token || JSON.parse(localStorage.getItem('user'))?.access_token;
     try {
-      const res = await fetch(`http://localhost:5000/users/users/${userId}/unban`, {
+      const res = await fetch(`https://book-review-app-kgew.onrender.com/users/users/${userId}/unban`, {
         method: 'POST',
         credentials: 'include',
         headers: {

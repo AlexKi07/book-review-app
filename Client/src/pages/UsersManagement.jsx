@@ -20,7 +20,7 @@ function UsersManagement() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:5000/users/users", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/users/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -47,7 +47,7 @@ function UsersManagement() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/users/users/${id}`, {
+      const res = await fetch(`https://book-review-app-kgew.onrender.com/users/users/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

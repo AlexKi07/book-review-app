@@ -14,7 +14,7 @@ function authHeaders() {
 }
 
 export async function loginUser(credentials) {
-  const res = await fetch("http://localhost:5000/auth/login", {
+  const res = await fetch("https://book-review-app-kgew.onrender.com/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),

@@ -13,7 +13,7 @@ function BookManagement() {
   const fetchBooks = async () => {
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch("http://localhost:5000/books/books", {
+      const res = await fetch("https://book-review-app-kgew.onrender.com/books/books", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -33,7 +33,7 @@ function BookManagement() {
 
     try {
       const token = localStorage.getItem("access_token");
-      const res = await fetch(`http://localhost:5000/books/books/${id}`, {
+      const res = await fetch(`https://book-review-app-kgew.onrender.com/books/books/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
