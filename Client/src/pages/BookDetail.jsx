@@ -72,7 +72,7 @@ function BookDetail() {
   };
 
   const handleReviewEdit = async () => {
-    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/books/reviews/${editingReviewId}`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/reviews/${editingReviewId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
