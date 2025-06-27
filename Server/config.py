@@ -4,7 +4,7 @@ from datetime import timedelta
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY', 'your_secret_key')
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'your_jwt_secret_key')
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///bookreviewdb.sqlite')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f795adbo4c739mh5tg-a.oregon-postgres.render.com/br_db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     CORS_ORIGINS = ["http://localhost:5173"]

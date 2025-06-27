@@ -31,7 +31,7 @@ def create_app(config_class=Config):
         allow_headers=["Content-Type", "Authorization"]
     )
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///your-db-path.db'  # or PostgreSQL/MySQL URL
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f795adbo4c739mh5tg-a.oregon-postgres.render.com/br_db'  # or PostgreSQL/MySQL URL
 
     db.init_app(app)
     mail.init_app(app)
