@@ -103,7 +103,7 @@ function BookDetail() {
 
   const handleReviewCommentSubmit = async (e, reviewId) => {
     e.preventDefault();
-    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/books/reviews/${reviewId}/comments`, {
+    const res = await fetch(`https://book-review-app-kgew.onrender.com/books/reviews/${reviewId}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
