@@ -1,6 +1,6 @@
 # WELCOME TO REVIEWCORNER (A Book Review App)
 
-This app is meant to enable users who are fond of reading gain insights on trendy books, their reviews and also allow them to post their own reccomendations.
+This app is designed to enable users who enjoy reading to gain insights into trendy books, their reviews, and also allow them to post their recommendations.
 
 Live Frontend: (https://book-review-app-psi.vercel.app)  
 Live Backend API: (https://book-review-app-kgew.onrender.com)
@@ -37,20 +37,24 @@ Live Database: (postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f
 
 ## How To Initialise
 1. Clone the Repository
-    git clone https://github.com/AlexKi07/book-review-app.git
+
+   git clone https://github.com/AlexKi07/book-review-app.git
     cd book-review-app
 
-2. Set up Backend
+3. Set up Backend
+
     cd Server
     pipenv install
     pipenv shell
 
-3.Database
+3. Database
+    
     flask db upgrade     
     python seed.py        
     flask run 
 
-4.Set up frontend
+4. Set upthe  frontend
+    
     cd Client
     npm install
     -Create .env file
