@@ -8,11 +8,12 @@ from config import Config
 from app.extensions import db, mail
 from datetime import timedelta
 
+
 def create_app(config_class=Config):
     """Application factory function"""
     app = Flask(__name__)
     app.config.from_object(config_class)
-    
+
     FRONTEND_URL = os.getenv("FRONTEND_URL", "https://book-review-app-psi.vercel.app")
 
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
@@ -24,11 +25,20 @@ def create_app(config_class=Config):
     app.config['JWT_CSRF_IN_COOKIES'] = True
 
     CORS(app, supports_credentials=True, origins=[
-    FRONTEND_URL,
-    "http://localhost:5173"
-])
+        FRONTEND_URL,
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"  
+    ])
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f795adbo4c739mh5tg-a.oregon-postgres.render.com/br_db'  # or PostgreSQL/MySQL URL
+    print("🚀 Allowed CORS Origins:")
+    print(f" - {FRONTEND_URL}")
+    print(" - http://localhost:5173")
+    print(" - http://127.0.0.1:5173")
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+        'DATABASE_URL',
+        'postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f795adbo4c739mh5tg-a.oregon-postgres.render.com/br_db'
+    )
 
     db.init_app(app)
     mail.init_app(app)

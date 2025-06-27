@@ -70,6 +70,9 @@ def register():
     if not data['username'].strip():
         return jsonify({"error": "Username cannot be empty"}), 400
 
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({"error": "Username already taken"}), 409
+
     if User.query.filter_by(email=data['email']).first():
         return jsonify({"error": "Email already registered"}), 409
 
