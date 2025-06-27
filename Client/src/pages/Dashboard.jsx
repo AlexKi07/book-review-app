@@ -1,95 +1,273 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export function BookForm() {
+export default function BookForm() {
   const [formData, setFormData] = useState({
     title: "",
     author: "",
     genre: "",
     summary: "",
+    cover_image_url: "",
   });
-  const [coverImage, setCoverImage] = useState(null);
+
+  const [userList, setUserList] = useState([]);
+  const [editItemId, setEditItemId] = useState(null);
+  const [newStatus, setNewStatus] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user"));
   const token = user?.access_token;
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
   };
 
-  const handleFileChange = (e) => {
-    setCoverImage(e.target.files[0]);
+  const fetchUserList = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/list/list", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setUserList(data);
+    } catch (err) {
+      console.error("Failed to load book list", err);
+    }
   };
+
+  useEffect(() => {
+    if (token) fetchUserList();
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const form = new FormData();
-    form.append("title", formData.title);
-    form.append("author", formData.author);
-    form.append("genre", formData.genre);
-    form.append("summary", formData.summary);
-    if (coverImage) form.append("cover_image", coverImage);
+    const bookData = { ...formData };
 
-    const res = await fetch("http://localhost:5000/books/books", {
-      method: "POST",
+    try {
+      const res = await fetch("http://localhost:5000/books/books", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bookData),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to add book.");
+      }
+
+      const newBook = await res.json();
+
+      await fetch("http://localhost:5000/list/list", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          book_id: newBook.id,
+          status: "Want to Read",
+        }),
+      });
+
+      alert("Book added and added to your list as 'Want to Read'!");
+      setFormData({
+        title: "",
+        author: "",
+        genre: "",
+        summary: "",
+        cover_image_url: "",
+      });
+      fetchUserList();
+    } catch (error) {
+      alert("Error: " + error.message);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Remove this book from your list?")) return;
+
+    const res = await fetch(`http://localhost:5000/list/list/${id}`, {
+      method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`, // Don't set Content-Type manually
+        Authorization: `Bearer ${token}`,
       },
-      body: form,
     });
 
     if (res.ok) {
-      alert("Book added successfully!");
-      setFormData({ title: "", author: "", genre: "", summary: "" });
-      setCoverImage(null);
+      fetchUserList();
     } else {
-      const err = await res.json();
-      alert("Error: " + err.message);
+      alert("Failed to delete book from your list.");
+    }
+  };
+
+  const handleStatusUpdate = async (id) => {
+    const res = await fetch(`http://localhost:5000/list/list/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status: newStatus }),
+    });
+
+    if (res.ok) {
+      setEditItemId(null);
+      setNewStatus("");
+      fetchUserList();
+    } else {
+      alert("Failed to update status.");
     }
   };
 
   return (
-    <div className="max-w-lg mx-auto p-4 bg-white rounded shadow mt-6">
+    <div className="max-w-4xl mx-auto p-4 bg-white rounded shadow mt-6">
       <h2 className="text-xl font-semibold mb-4">Add a New Book</h2>
-      <form onSubmit={handleSubmit} className="space-y-3" encType="multipart/form-data">
-        <input type="text" name="title" placeholder="Title" className="w-full border p-2 rounded" value={formData.title} onChange={handleChange} required />
-        <input type="text" name="author" placeholder="Author" className="w-full border p-2 rounded" value={formData.author} onChange={handleChange} required />
-        <input type="text" name="genre" placeholder="Genre" className="w-full border p-2 rounded" value={formData.genre} onChange={handleChange} required />
-        <textarea name="summary" placeholder="Summary" className="w-full border p-2 rounded" rows={4} value={formData.summary} onChange={handleChange}></textarea>
-        <input type="file" name="cover_image" accept="image/*" onChange={handleFileChange} />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <input
+          type="text"
+          name="title"
+          placeholder="Title"
+          className="w-full border p-2 rounded"
+          value={formData.title}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="author"
+          placeholder="Author"
+          className="w-full border p-2 rounded"
+          value={formData.author}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="text"
+          name="genre"
+          placeholder="Genre"
+          className="w-full border p-2 rounded"
+          value={formData.genre}
+          onChange={handleChange}
+          required
+        />
+        <textarea
+          name="summary"
+          placeholder="Summary"
+          className="w-full border p-2 rounded"
+          rows={4}
+          value={formData.summary}
+          onChange={handleChange}
+        ></textarea>
+        <input
+          type="text"
+          name="cover_image_url"
+          placeholder="Cover Image URL"
+          value={formData.cover_image_url}
+          onChange={handleChange}
+          className="w-full p-2 border rounded"
+        />
+        {formData.cover_image_url && (
+        <img
+          src={formData.cover_image_url}
+          alt="Preview"
+          className="w-32 h-auto border mt-2 rounded"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/150x220.png?text=No+Cover";
+          }}
+  />
+)}
+
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
           Submit Book
         </button>
       </form>
-    </div>
-  );
-}
 
+      {/* Book List Section */}
+      <div className="mt-10">
+        <h3 className="text-lg font-bold mb-4">Your Book List</h3>
+        {userList.length === 0 ? (
+          <p className="text-gray-500">No books in your list yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {userList.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-start gap-4 border rounded p-3 bg-gray-50"
+              >
+                {item.book.cover_image && (
+                  <img
+                    src={item.book.cover_image}
+                    alt={item.book.title}
+                    className="w-24 h-32 object-cover rounded"
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
+                )}
+                <div className="flex-1">
+                  <h4 className="text-md font-semibold">{item.book.title}</h4>
+                  <p className="text-sm text-gray-700">by {item.book.author}</p>
+                  <p className="text-sm text-gray-500">Genre: {item.book.genre}</p>
+                  <p className="text-sm italic mt-1 text-blue-600">{item.status}</p>
 
-export default function Dashboard() {
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-      <p className="text-gray-700">
-        Welcome to your dashboard! Here you can see a summary of your activity and manage your books.
-      </p>
-
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">Books Summary</h2>
-          <p>You have 0 books added.</p>
-        </div>
-
-        <div className="bg-white p-4 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-2">Profile Info</h2>
-          <p>Edit your account or see your details here.</p>
-        </div>
+                  {editItemId === item.id ? (
+                    <div className="mt-2 space-x-2">
+                      <select
+                        value={newStatus}
+                        onChange={(e) => setNewStatus(e.target.value)}
+                        className="border px-2 py-1 rounded"
+                      >
+                        <option value="">Select status</option>
+                        <option value="Want to Read">Want to Read</option>
+                        <option value="Currently Reading">Currently Reading</option>
+                        <option value="Read">Read</option>
+                      </select>
+                      <button
+                        onClick={() => handleStatusUpdate(item.id)}
+                        className="bg-green-600 text-white px-2 py-1 rounded"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => setEditItemId(null)}
+                        className="text-sm text-gray-600 underline"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-2 space-x-3">
+                      <button
+                        onClick={() => {
+                          setEditItemId(item.id);
+                          setNewStatus(item.status);
+                        }}
+                        className="text-sm text-blue-600 underline"
+                      >
+                        Edit Status
+                      </button>
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="text-sm text-red-600 underline"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Add Book Submission Form */}
-      <BookForm />
     </div>
   );
 }

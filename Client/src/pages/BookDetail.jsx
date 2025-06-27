@@ -79,35 +79,37 @@ function BookDetail() {
     }
   };
 
-  if (!book) return <p className="text-center mt-10">Loading...</p>;
+  if (!book) return <p className="text-center text-gray-500 mt-10">Loading...</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       {/* Book Info */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{book.title}</h1>
-        <p className="text-gray-600 text-lg">By {book.author}</p>
-        <p className="italic text-sm mb-2">{book.genre}</p>
+      <div className="bg-white rounded-2xl shadow p-6 mb-10">
+        <h1 className="text-4xl font-bold text-gray-800 mb-1">{book.title}</h1>
+        <p className="text-xl text-gray-600">by {book.author}</p>
+        <p className="text-sm italic text-purple-500 mb-4">{book.genre}</p>
 
-        <div className="mt-2 text-base">
-          <strong>Summary:</strong>
-          <p>{book.summary}</p>
-        </div>
+        <div className="text-gray-700">
+          <h2 className="font-semibold mb-1">Summary:</h2>
+          <p className="mb-3">{book.summary}</p>
 
-        <div className="mt-2">
-          <strong>⭐ Average Rating:</strong>{" "}
-          {book.average_rating ? `${book.average_rating}/5` : "No ratings yet"}
+          <p className="text-md">
+            <strong>⭐ Average Rating:</strong>{" "}
+            <span className="text-yellow-600 font-medium">
+              {book.average_rating ? `${book.average_rating}/5` : "No ratings yet"}
+            </span>
+          </p>
         </div>
       </div>
 
       {/* Reviews */}
-      <div className="mt-6">
-        <h2 className="text-2xl font-semibold mb-3">Reviews</h2>
+      <div className="mb-10">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Reviews</h2>
         {book.reviews?.length ? (
           book.reviews.map((r) => (
-            <div key={r.id} className="border p-3 mb-2 rounded shadow-sm">
+            <div key={r.id} className="bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm">
               <p>
-                <strong>{r.username}</strong>: {r.content}
+                <span className="font-semibold text-purple-700">{r.username}</span>: {r.content}
               </p>
             </div>
           ))
@@ -116,35 +118,35 @@ function BookDetail() {
         )}
       </div>
 
-      {/* Authenticated Actions */}
+      {/* Authenticated User Actions */}
       {token && (
-        <div className="mt-10">
+        <div className="space-y-8">
           {/* Add Review */}
-          <div className="mb-8 p-4 border rounded shadow">
-            <h3 className="text-lg font-semibold mb-2">Add a Review</h3>
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Add a Review</h3>
             <ReviewEditor onSubmit={handleReviewSubmit} />
           </div>
 
           {/* Rate Book */}
-          <div className="mb-8 p-4 border rounded shadow">
-            <h3 className="text-lg font-semibold mb-2">Rate this Book</h3>
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Rate this Book</h3>
             <RatingSelector value={rating} onChange={(val) => setRating(val)} />
             <button
               onClick={handleRatingSubmit}
-              className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+              className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold px-4 py-2 rounded-lg transition"
             >
               Submit Rating
             </button>
           </div>
 
           {/* Comments */}
-          <div className="p-4 border rounded shadow">
-            <h3 className="text-lg font-semibold mb-2">Comments</h3>
+          <div className="bg-white p-5 rounded-xl shadow border">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">Comments</h3>
             <CommentList comments={comments} />
 
             <form onSubmit={handleCommentSubmit} className="mt-4">
               <textarea
-                className="w-full border p-2 rounded mb-2"
+                className="w-full border border-gray-300 p-3 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-purple-400"
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 rows={3}
@@ -152,7 +154,7 @@ function BookDetail() {
               />
               <button
                 type="submit"
-                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg transition"
               >
                 Post Comment
               </button>

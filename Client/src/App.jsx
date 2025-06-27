@@ -17,8 +17,11 @@ import AdminRoute from "./routes/AdminRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import UsersManagement from "./pages/UsersManagement";
 import BooksManagement from "./pages/BooksManagement";
+import HomePage from "./pages/HomePage";
+import ContactPage from "./pages/ContactPage";
 
 import Layout from "./components/Layout";
+import FooterPage from "./pages/FooterPage";
 import AdminLayout from "./components/AdminLayout";
 import EditProfileForm from "./components/EditProfileForm";
 
@@ -36,6 +39,8 @@ function App() {
     {/* Public Routes */}
     <Route path="/login" element={<LoginForm />} />
     <Route path="/register" element={<RegisterForm />} />
+    <Route path="/" element={<HomePage />} />
+
 
     {/* Protected User Routes */}
     <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
@@ -44,6 +49,7 @@ function App() {
       <Route path="/books" element={<BookList />} />
       <Route path="/books/:id" element={<BookDetail />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/contact" element={<ContactPage />} />
     </Route>
 
     {/* Admin Routes with AdminLayout */}
@@ -63,6 +69,7 @@ function App() {
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />
   </Routes>
+  <FooterPage />
   <ToastContainer position="top-center" autoClose={3000} /> 
   
 </>

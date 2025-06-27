@@ -7,20 +7,25 @@ function Navbar({ isLoggedIn, user, onLogout }) {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = isLoggedIn
-    ? [
-        { to: "/dashboard", label: "Dashboard" },
-        { to: "/profile", label: "Profile" },
-        { to: "/books", label: "Books" },
-        ...(user?.is_admin
-          ? [
-              { to: "/admin", label: "Admin" },
-              { to: "/admin/users", label: "Users" },
-              { to: "/admin/books", label: "Books" },
-            ]
-          : []),
-      ]
-    : [{ to: "/register", label: "Register" }];
+  const navItems = [
+    { to: "/", label: "Home" },
+    ...(isLoggedIn
+      ? [
+          { to: "/dashboard", label: "Dashboard" },
+          { to: "/profile", label: "Profile" },
+          { to: "/books", label: "Books" },
+          { to: "/contact", label: "Contact" },
+          ...(user?.is_admin
+            ? [
+                { to: "/admin", label: "Admin" },
+                { to: "/admin/users", label: "Users" },
+                { to: "/admin/books", label: "Books" },
+              ]
+            : []),
+        ]
+      : [{ to: "/register", label: "Register" }]),
+  ];
+  
 
   const handleLogout = () => {
     onLogout();

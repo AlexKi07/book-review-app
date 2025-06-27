@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_cors import cross_origin
-from werkzeug.utils import secure_filename
 import os
 
 from app.models.models import db, Book, Review, Rating, Comment
@@ -11,39 +10,33 @@ UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# CORS Preflight
 @books.route('/books', methods=['OPTIONS'])
 @cross_origin(origins=["http://localhost:5173"], supports_credentials=True)
 def books_options():
     return '', 200
 
 
-# Create a Book
 @books.route('/books', methods=['POST'])
 @cross_origin(origins=["http://localhost:5173"], supports_credentials=True)
 @jwt_required()
 def create_book():
-    title = request.form.get('title')
-    author = request.form.get('author')
-    genre = request.form.get('genre')
-    summary = request.form.get('summary')
-    cover_image = request.files.get('cover_image')
+    data = request.get_json()
+
+    title = data.get('title')
+    author = data.get('author')
+    genre = data.get('genre')
+    summary = data.get('summary')
+    cover_image_url = data.get('cover_image_url')  # No validation
 
     if not all([title, author, genre]):
         return jsonify({"error": "Title, author, and genre are required."}), 400
-
-    filename = None
-    if cover_image:
-        filename = secure_filename(cover_image.filename)
-        path = os.path.join(UPLOAD_FOLDER, filename)
-        cover_image.save(path)
 
     new_book = Book(
         title=title,
         author=author,
         genre=genre,
         summary=summary,
-        cover_image=filename
+        cover_image=cover_image_url
     )
 
     db.session.add(new_book)
@@ -52,15 +45,23 @@ def create_book():
     return jsonify(new_book.to_dict()), 201
 
 
-# Get all Books
 @books.route('/books', methods=['GET'])
 @cross_origin(origins=["http://localhost:5173"], supports_credentials=True)
 def get_books():
-    books = Book.query.all()
+    search = request.args.get("search", "").strip().lower()
+
+    if search:
+        books = Book.query.filter(
+            (Book.title.ilike(f"%{search}%")) |
+            (Book.author.ilike(f"%{search}%")) |
+            (Book.genre.ilike(f"%{search}%"))
+        ).all()
+    else:
+        books = Book.query.all()
+
     return jsonify([b.to_dict() for b in books]), 200
 
 
-# Get Single Book with Reviews and Rating
 @books.route('/books/<int:book_id>', methods=['GET'])
 def get_book(book_id):
     book = Book.query.get_or_404(book_id)
@@ -84,7 +85,6 @@ def get_book(book_id):
     }), 200
 
 
-# Update a Book
 @books.route('/books/<int:book_id>', methods=['PUT'])
 @jwt_required()
 def update_book(book_id):
@@ -99,7 +99,6 @@ def update_book(book_id):
     return jsonify({"message": "Book updated!"}), 200
 
 
-# Delete a Book
 @books.route('/books/<int:book_id>', methods=['DELETE'])
 @jwt_required()
 def delete_book(book_id):
@@ -109,7 +108,6 @@ def delete_book(book_id):
     return jsonify({"message": "Book removed!"}), 200
 
 
-# Post a Review
 @books.route('/books/<int:book_id>/reviews', methods=['POST'])
 @jwt_required()
 def post_review(book_id):
@@ -127,7 +125,6 @@ def post_review(book_id):
     return jsonify(review.to_dict()), 201
 
 
-# Post a Rating
 @books.route('/books/<int:book_id>/ratings', methods=['POST'])
 @jwt_required()
 def post_rating(book_id):
@@ -149,7 +146,6 @@ def post_rating(book_id):
     return jsonify({"message": "Rating submitted"}), 201
 
 
-# Post a Comment
 @books.route('/books/<int:book_id>/comments', methods=['POST'])
 @jwt_required()
 def post_book_comment(book_id):
@@ -167,7 +163,6 @@ def post_book_comment(book_id):
     return jsonify({"message": "Comment added!"}), 201
 
 
-# Get Comments for a Book
 @books.route('/books/<int:book_id>/comments', methods=['GET'])
 def get_book_comments(book_id):
     book = Book.query.get_or_404(book_id)
