@@ -10,7 +10,7 @@ function BookList() {
     try {
       const url = query
         ? `https://book-review-app-kgew.onrender.com/books/books?search=${encodeURIComponent(query)}`
-        : "https://book-review-app-kgew.onrender.com/books";
+        : "https://book-review-app-kgew.onrender.com/books/books";
       const res = await fetch(url);
       if (!res.ok) throw new Error("Failed to fetch books");
       const data = await res.json();
