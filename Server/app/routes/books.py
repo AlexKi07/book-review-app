@@ -81,7 +81,15 @@ def get_book(book_id):
                 "content": r.content,
                 "user_id": r.user_id,
                 "username": r.user.username if r.user else "Unknown",
-                "created_at": r.created_at
+                "created_at": r.created_at,
+                "comments": [
+                    {
+                        "id": c.id,
+                        "content": c.content,
+                        "username": c.user.username if c.user else "Unknown",
+                        "created_at": c.created_at
+                    } for c in r.comments
+                ]
             } for r in book.reviews
         ]
     }), 200
@@ -178,9 +186,9 @@ def post_rating(book_id):
     return jsonify({"message": "Rating submitted"}), 201
 
 
-@books.route('/books/<int:book_id>/comments', methods=['POST'])
+@books.route('/reviews/<int:review_id>/comments', methods=['POST'])
 @jwt_required()
-def post_book_comment(book_id):
+def post_review_comment(review_id):
     user_id = get_jwt_identity()
     data = request.get_json()
 
@@ -188,29 +196,37 @@ def post_book_comment(book_id):
     if not content:
         return jsonify({"error": "Content is required"}), 400
 
+    review = Review.query.get_or_404(review_id)
+
+    book_id = review.book_id
+    if not book_id:
+        return jsonify({"error": "This review is not linked to a book."}), 400
+
     comment = Comment(
         content=content,
         user_id=user_id,
         book_id=book_id,
+        review_id=review_id,
         created_at=datetime.utcnow()
     )
+
     db.session.add(comment)
     db.session.commit()
 
-    return jsonify({"message": "Comment added!"}), 201
+    return jsonify({"message": "Comment added to review!"}), 201
 
 
-@books.route('/books/<int:book_id>/comments', methods=['GET'])
-def get_book_comments(book_id):
-    book = Book.query.get_or_404(book_id)
+
+@books.route('/reviews/<int:review_id>/comments', methods=['GET'])
+def get_review_comments(review_id):
+    review = Review.query.get_or_404(review_id)
     return jsonify([
         {
             "id": c.id,
             "content": c.content,
-            "user_id": c.user_id,
             "username": c.user.username if c.user else "Unknown",
             "created_at": c.created_at
-        } for c in book.comments
+        } for c in review.comments
     ]), 200
 
 
@@ -228,15 +244,15 @@ def delete_review(book_id, review_id):
     return jsonify({"message": "Review deleted"}), 200
 
 
-@books.route('/books/<int:book_id>/comments/<int:comment_id>', methods=['DELETE'])
+@books.route('/reviews/<int:review_id>/comments/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
-def delete_comment(book_id, comment_id):
+def delete_review_comment(review_id, comment_id):
     user_id = get_jwt_identity()
-    comment = Comment.query.filter_by(id=comment_id, book_id=book_id).first_or_404()
+    comment = Comment.query.filter_by(id=comment_id, review_id=review_id).first_or_404()
 
     if comment.user_id != user_id:
         return jsonify({"error": "Unauthorized to delete this comment"}), 403
 
     db.session.delete(comment)
     db.session.commit()
-    return jsonify({"message": "Comment deleted"}), 200
+    return jsonify({"message": "Comment deleted from review"}), 200

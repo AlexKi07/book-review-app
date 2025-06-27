@@ -70,7 +70,7 @@ class Book(db.Model):
             "genre": self.genre,
             "summary": self.summary,
             "cover_image": self.cover_image,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else "",
         }
 
         if include_reviews:
@@ -106,7 +106,7 @@ class Review(db.Model):
             "content": self.content,
             "book_id": self.book_id,
             "user_id": self.user_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else "",
         }
 
         if include_user and self.user:
@@ -143,7 +143,7 @@ class Rating(db.Model):
             "score": self.score,
             "book_id": self.book_id,
             "user_id": self.user_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else "",
         }
 
         if include_user and self.user:
@@ -180,7 +180,7 @@ class Comment(db.Model):
             "user_id": self.user_id,
             "book_id": self.book_id,
             "review_id": self.review_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else "",
         }
 
         if include_user and self.user:
@@ -214,7 +214,7 @@ class UserBookList(db.Model):
             "user_id": self.user_id,
             "book_id": self.book_id,
             "status": self.status,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat() if self.created_at else "",
         }
 
         if include_book and self.book:

@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-  
+
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
         logout(); 
       }
     }
-  
+
     setIsLoadingAuth(false);
   }, []);
 
@@ -38,23 +38,22 @@ export const AuthProvider = ({ children }) => {
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-  
+
       if (!response.ok) throw new Error('Login failed');
+
       const data = await response.json();
-  
+
       if (!data.access_token || !data.user) {
         throw new Error('Invalid response from server');
       }
-  
-      // ✅ Merge tokens with user and store a single object
+
       const fullUserData = {
         ...data.user,
         access_token: data.access_token,
-        refresh_token: data.refresh_token || ''
+        refresh_token: data.refresh_token || '',
       };
-  
+
       localStorage.setItem('user', JSON.stringify(fullUserData));
-  
       setUser(fullUserData);
       setIsAuthenticated(true);
       return true;
@@ -63,7 +62,6 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
   };
-  
 
   const logout = () => {
     localStorage.removeItem('user');
@@ -71,7 +69,6 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     navigate('/login');
   };
-  
 
   return (
     <AuthContext.Provider
@@ -81,8 +78,8 @@ export const AuthProvider = ({ children }) => {
         isLoadingAuth,
         login,
         logout,
-        setUser, 
-        setIsAuthenticated, 
+        setUser,
+        setIsAuthenticated,
       }}
     >
       {children}

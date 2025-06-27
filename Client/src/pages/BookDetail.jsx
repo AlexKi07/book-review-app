@@ -1,8 +1,8 @@
+// BookDetail.jsx
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-import CommentList from "../components/CommentList";
 import ReviewEditor from "../components/ReviewEditor";
 import RatingSelector from "../components/RatingSelector";
 
@@ -10,7 +10,6 @@ function BookDetail() {
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const [rating, setRating] = useState(0);
-  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [editingReviewId, setEditingReviewId] = useState(null);
   const [editedReviewContent, setEditedReviewContent] = useState("");
@@ -21,15 +20,7 @@ function BookDetail() {
   const currentUsername = userData?.user?.username;
 
   useEffect(() => {
-    fetch(`http://localhost:5000/books/books/${id}`)
-      .then((res) => res.json())
-      .then(setBook);
-  }, [id]);
-
-  useEffect(() => {
-    fetch(`http://localhost:5000/books/books/${id}/comments`)
-      .then((res) => res.json())
-      .then(setComments);
+    refreshBook();
   }, [id]);
 
   const refreshBook = async () => {
@@ -81,7 +72,7 @@ function BookDetail() {
   };
 
   const handleReviewEdit = async () => {
-    const res = await fetch(`http://localhost:5000/reviews/${editingReviewId}`, {
+    const res = await fetch(`http://localhost:5000/books/reviews/${editingReviewId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -110,10 +101,9 @@ function BookDetail() {
     if (res.ok) refreshBook();
   };
 
-  const handleCommentSubmit = async (e) => {
+  const handleReviewCommentSubmit = async (e, reviewId) => {
     e.preventDefault();
-
-    const res = await fetch(`http://localhost:5000/books/books/${id}/comments`, {
+    const res = await fetch(`http://localhost:5000/books/reviews/${reviewId}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -124,32 +114,23 @@ function BookDetail() {
 
     if (res.ok) {
       setNewComment("");
-      const updatedComments = await fetch(`http://localhost:5000/books/books/${id}/comments`).then((res) =>
-        res.json()
-      );
-      setComments(updatedComments);
+      refreshBook();
     }
   };
 
-  const handleCommentDelete = async (commentId) => {
-    const res = await fetch(`http://localhost:5000/books/books/${id}/comments/${commentId}`, {
+  const handleReviewCommentDelete = async (reviewId, commentId) => {
+    const res = await fetch(`http://localhost:5000/books/reviews/${reviewId}/comments/${commentId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    if (res.ok) {
-      const updatedComments = await fetch(`http://localhost:5000/books/books/${id}/comments`).then((res) =>
-        res.json()
-      );
-      setComments(updatedComments);
-    }
+    if (res.ok) refreshBook();
   };
 
   if (!book) return <p className="text-center text-gray-500 mt-10 text-lg">Loading book details...</p>;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Book Details */}
       <div className="bg-white shadow-md rounded-2xl p-6 mb-8">
         <h1 className="text-4xl font-bold text-gray-800 mb-2">{book.title}</h1>
         <p className="text-xl text-gray-600 mb-1">by {book.author}</p>
@@ -174,12 +155,11 @@ function BookDetail() {
         )}
       </div>
 
-      {/* Reviews */}
       <div className="mb-10">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">User Reviews</h2>
         {book.reviews?.length > 0 ? (
           book.reviews.map((r) => (
-            <div key={r.id} className="bg-white border rounded-lg p-4 mb-3 shadow-sm">
+            <div key={r.id} className="bg-white border rounded-lg p-4 mb-6 shadow-sm">
               {editingReviewId === r.id ? (
                 <>
                   <textarea
@@ -216,6 +196,37 @@ function BookDetail() {
                   )}
                 </>
               )}
+
+              <div className="mt-4 pl-4 border-l-4 border-purple-300">
+                {(r.comments || []).map((c) => (
+                  <div key={c.id} className="mb-2">
+                    <p className="text-sm">
+                      <strong className="text-purple-700">{c.username}</strong>: {c.content}
+                    </p>
+                    {token && c.username === currentUsername && (
+                      <button
+                        onClick={() => handleReviewCommentDelete(r.id, c.id)}
+                        className="text-xs text-red-600 underline"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <form onSubmit={(e) => handleReviewCommentSubmit(e, r.id)} className="mt-2">
+                  <textarea
+                    className="w-full border p-2 rounded mb-2"
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    rows={2}
+                    placeholder="Reply to this review..."
+                  />
+                  <button type="submit" className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm">
+                    Comment
+                  </button>
+                </form>
+              </div>
             </div>
           ))
         ) : (
@@ -223,16 +234,13 @@ function BookDetail() {
         )}
       </div>
 
-      {/* User Interactions */}
       {token && (
         <div className="space-y-10">
-          {/* Review */}
           <div className="bg-white p-6 rounded-xl shadow border">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">Write a Review</h3>
             <ReviewEditor onSubmit={handleReviewSubmit} />
           </div>
 
-          {/* Rating */}
           <div className="bg-white p-6 rounded-xl shadow border">
             <h3 className="text-xl font-semibold mb-4 text-gray-800">Rate this Book</h3>
             <RatingSelector value={rating} onChange={(val) => setRating(val)} />
@@ -242,42 +250,6 @@ function BookDetail() {
             >
               Submit Rating
             </button>
-          </div>
-
-          {/* Comments */}
-          <div className="bg-white p-6 rounded-xl shadow border">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Comments</h3>
-            {comments.map((c) => (
-              <div key={c.id} className="border rounded-lg p-3 mb-2">
-                <p>
-                  <strong className="text-purple-700">{c.username}</strong>: {c.content}
-                </p>
-                {token && c.username === currentUsername && (
-                  <button
-                    onClick={() => handleCommentDelete(c.id)}
-                    className="text-sm text-red-600 underline mt-1"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            ))}
-
-            <form onSubmit={handleCommentSubmit} className="mt-4">
-              <textarea
-                className="w-full border border-gray-300 p-3 rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                rows={3}
-                placeholder="Write your comment..."
-              />
-              <button
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg transition"
-              >
-                Post Comment
-              </button>
-            </form>
           </div>
         </div>
       )}
