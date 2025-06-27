@@ -13,7 +13,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
     
-    FRONTEND_URL = os.getenv("FRONTEND_URL", "https://book-review-app-psi.vercel.app/")
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "https://book-review-app-psi.vercel.app")
 
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
