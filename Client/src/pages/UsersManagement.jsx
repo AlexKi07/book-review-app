@@ -7,7 +7,8 @@ function UsersManagement() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const token = localStorage.getItem("access_token");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const token = user?.access_token;
 
   useEffect(() => {
     if (!token) {
