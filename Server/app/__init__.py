@@ -23,13 +23,10 @@ def create_app(config_class=Config):
     app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     app.config['JWT_CSRF_IN_COOKIES'] = True
 
-    CORS(
-        app,
-        origins=[FRONTEND_URL],
-        supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"]
-    )
+    CORS(app, supports_credentials=True, origins=[
+    "http://localhost:5173",  
+    "https://book-review-app-psi.vercel.app"  
+])
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f795adbo4c739mh5tg-a.oregon-postgres.render.com/br_db'  # or PostgreSQL/MySQL URL
 
