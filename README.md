@@ -69,4 +69,9 @@ Live Database: (postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f
 Copyright©
 2025 ReviewCorner. All rights reserved.
 
+## SLIDES PRESENTATION
+https://docs.google.com/presentation/d/1YHUgHCKeToL0DCoCpt2xfF-jFeD02eM8zeJU45gIB-U/edit?usp=sharing
+
+## RECORDING PRESENTATION
+
 
