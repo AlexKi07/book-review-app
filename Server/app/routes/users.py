@@ -179,3 +179,29 @@ def unban_user(user_id):
     except Exception as e:
         db.session.rollback()
         return set_cors(jsonify({"error": str(e)})), 500
+
+
+@users.route('/users/<int:user_id>', methods=['DELETE', 'OPTIONS'])
+def delete_user(user_id):
+    if request.method == 'OPTIONS':
+        return set_cors(jsonify({})), 204
+
+    verify_jwt_in_request()
+    current_user_id = get_jwt_identity()
+    current_user = User.query.get(current_user_id)
+
+    if not current_user or not current_user.is_admin:
+        return set_cors(jsonify({"error": "Admins only"})), 403
+
+    user = User.query.get_or_404(user_id)
+
+    if user.is_admin:
+        return set_cors(jsonify({"error": "Cannot delete another admin"})), 400
+
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        return set_cors(jsonify({"message": f"User {user.username} has been deleted."})), 200
+    except Exception as e:
+        db.session.rollback()
+        return set_cors(jsonify({"error": str(e)})), 500
