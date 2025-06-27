@@ -1,19 +1,17 @@
-// src/pages/Books.jsx
 import { useEffect, useState } from "react";
 import BookCard from "../components/BookCard";
 
-function Books() {
+function BookList() {
   const [books, setBooks] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:5000/books/books")
       .then((res) => res.json())
-      .then(setBooks)
-      .catch(console.error);
+      .then(setBooks);
   }, []);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-6">
       {books.map((book) => (
         <BookCard key={book.id} book={book} />
       ))}
@@ -21,4 +19,4 @@ function Books() {
   );
 }
 
-export default Books;
+export default BookList;

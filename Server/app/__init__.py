@@ -20,7 +20,7 @@ def create_app(config_class=Config):
     app.config['JWT_TOKEN_LOCATION'] = ['headers', 'cookies']
     app.config['JWT_COOKIE_SECURE'] = not app.debug
     app.config['JWT_COOKIE_SAMESITE'] = 'Lax'
-    app.config['JWT_COOKIE_CSRF_PROTECT'] = True
+    app.config['JWT_COOKIE_CSRF_PROTECT'] = False
     app.config['JWT_CSRF_IN_COOKIES'] = True
 
     CORS(

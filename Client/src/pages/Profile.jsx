@@ -9,18 +9,33 @@ function Profile() {
   useEffect(() => {
     if (isLoadingAuth || !isAuthenticated) return;
 
-    const token = localStorage.getItem("access_token");
-    if (!token) {
+    const stored = localStorage.getItem("user");
+    if (!stored) {
+      console.error("User not found in localStorage.");
+      return;
+    }
+
+    let accessToken;
+    try {
+      const user = JSON.parse(stored);
+      accessToken = user?.access_token;
+    } catch (err) {
+      console.error("Failed to parse user object:", err);
+      return;
+    }
+
+    if (!accessToken) {
       console.error("No access token found.");
       return;
     }
 
     fetch("http://localhost:5000/users/me", {
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
-      credentials: "include",
+      credentials: "include", // for cookies if applicable
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch profile");
@@ -58,7 +73,7 @@ function Profile() {
       <div className="mt-6 flex justify-end">
         <Link
           to="/edit-profile"
-          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200 justify-end"
+          className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
         >
           Edit Profile
         </Link>

@@ -1,16 +1,22 @@
-// src/pages/UsersManagement.jsx
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function UsersManagement() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
+    if (!token) {
+      toast.error("Please log in to manage users");
+      navigate("/login");
+      return;
+    }
     fetchUsers();
-  }, []);
+  }, [token]);
 
   const fetchUsers = async () => {
     try {
@@ -20,12 +26,18 @@ function UsersManagement() {
         },
       });
 
+      if (res.status === 403 || res.status === 401) {
+        setTimeout(() => toast.error("Access denied. Please log in as admin."), 0);
+        navigate("/login");
+        return;
+      }
+
       if (!res.ok) throw new Error("Failed to fetch users");
 
       const data = await res.json();
       setUsers(data);
     } catch (err) {
-      toast.error(err.message);
+      setTimeout(() => toast.error(err.message), 0);
     } finally {
       setLoading(false);
     }
@@ -44,16 +56,17 @@ function UsersManagement() {
 
       if (!res.ok) throw new Error("Failed to delete user");
 
-      toast.success("User deleted successfully");
       setUsers(users.filter((u) => u.id !== id));
+      setTimeout(() => toast.success("User deleted successfully"), 0);
     } catch (err) {
-      toast.error(err.message);
+      setTimeout(() => toast.error(err.message), 0);
     }
   };
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto p-6">
       <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
+
       {loading ? (
         <p>Loading...</p>
       ) : users.length === 0 ? (

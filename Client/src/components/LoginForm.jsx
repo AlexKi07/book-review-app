@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { FiLock, FiMail, FiEye, FiEyeOff } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext'; // ✅ use login from context
+import { useAuth } from '../context/AuthContext';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -10,26 +10,36 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [inactivityTimer, setInactivityTimer] = useState(null);
+  const isMounted = useRef(true); // ✅ track mount state
 
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ only use login()
+  const { login } = useAuth();
 
   const resetInactivityTimer = () => {
     if (inactivityTimer) clearTimeout(inactivityTimer);
+
     const timer = setTimeout(() => {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
-      toast.info('You have been logged out due to inactivity');
-      navigate('/login');
+
+      if (isMounted.current) {
+        toast.info('You have been logged out due to inactivity');
+        navigate('/login');
+      }
     }, 1800000); // 30 minutes
+
     setInactivityTimer(timer);
   };
 
   useEffect(() => {
+    isMounted.current = true;
+
     const events = ['mousemove', 'keydown', 'scroll', 'click'];
     events.forEach(event => window.addEventListener(event, resetInactivityTimer));
+
     return () => {
+      isMounted.current = false;
       events.forEach(event => window.removeEventListener(event, resetInactivityTimer));
       if (inactivityTimer) clearTimeout(inactivityTimer);
     };
@@ -40,7 +50,7 @@ function LoginForm() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password); // ✅ call context login
+      const success = await login(email, password);
 
       if (success) {
         toast.success('Login successful!');
@@ -53,7 +63,9 @@ function LoginForm() {
       console.error("Login error:", error);
       toast.error('Login failed. Please try again.');
     } finally {
-      setIsLoading(false);
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
     }
   };
 

@@ -10,8 +10,14 @@ def create_rating():
     """Rate a book (1-5) by the authenticated user."""
     data = request.json
     user_id = get_jwt_identity()
-    book_id = data['book_id']
-    score = data['score']
+    book_id = data.get('book_id')
+    score = data.get('score')
+
+    if book_id is None or score is None:
+        return jsonify({"msg": "Missing book_id or score"}), 400
+
+    if not (1 <= score <= 5):
+        return jsonify({"msg": "Rating must be between 1 and 5"}), 400
 
     existing = Rating.query.filter_by(user_id=user_id, book_id=book_id).first()
     if existing:
@@ -20,7 +26,7 @@ def create_rating():
     rating = Rating(score=score, book_id=book_id, user_id=user_id)
     db.session.add(rating)
     db.session.commit()
-    return jsonify({"msg": "Rating added!", "id": rating.id})
+    return jsonify({"msg": "Rating added!", "id": rating.id}), 201
 
 @ratings.route('/ratings/<int:rating_id>', methods=['PUT'])
 @jwt_required()
@@ -32,8 +38,11 @@ def update_rating(rating_id):
         return jsonify({"msg": "Not authorized"}), 403
     
     data = request.json
-    rating.score = data['score']
+    score = data.get('score')
+    if score is None or not (1 <= score <= 5):
+        return jsonify({"msg": "Invalid or missing score"}), 400
 
+    rating.score = score
     db.session.commit()
     return jsonify({"msg": "Rating updated!"})
 
@@ -65,4 +74,24 @@ def view_all_ratings():
 def view_single_rating(rating_id):
     """View a single rating by its id."""
     rating = Rating.query.get_or_404(rating_id)
-    return jsonify({"id": rating.id, "score": rating.score, "book_id": rating.book_id, "user_id": rating.user_id})
+    return jsonify({
+        "id": rating.id,
+        "score": rating.score,
+        "book_id": rating.book_id,
+        "user_id": rating.user_id
+    })
+
+@ratings.route('/books/<int:book_id>/ratings', methods=['GET'])
+def get_ratings_for_book(book_id):
+    """Get all ratings for a specific book and the average."""
+    ratings = Rating.query.filter_by(book_id=book_id).all()
+    average = round(sum(r.score for r in ratings) / len(ratings), 2) if ratings else None
+
+    return jsonify({
+        "average_rating": average,
+        "ratings": [{
+            "id": r.id,
+            "score": r.score,
+            "user_id": r.user_id
+        } for r in ratings]
+    })

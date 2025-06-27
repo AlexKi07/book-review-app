@@ -8,7 +8,7 @@ import Navbar from './components/Navbar'; // Make sure you have this
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import Dashboard from "./pages/Dashboard";
-import Books from "./pages/Books";
+import Books from "./pages/BookList";
 import Profile from "./pages/Profile";
 import BookDetail from "./pages/BookDetail";
 import NotFound from "./pages/NotFound";
@@ -23,12 +23,13 @@ import AdminLayout from "./components/AdminLayout";
 import EditProfileForm from "./components/EditProfileForm";
 
 import "./index.css";
+import BookList from "./pages/BookList";
 
 function App() {
   const { user, isAuthenticated, logout } = useAuth();
 
   return (
-<>   
+<>  
   <Navbar isLoggedIn={isAuthenticated} user={user} onLogout={logout} />
 
   <Routes>
@@ -40,7 +41,7 @@ function App() {
     <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/edit-profile" element={<EditProfileForm />} />
-      <Route path="/books" element={<Books />} />
+      <Route path="/books" element={<BookList />} />
       <Route path="/books/:id" element={<BookDetail />} />
       <Route path="/profile" element={<Profile />} />
     </Route>
@@ -62,8 +63,8 @@ function App() {
     {/* Catch-all */}
     <Route path="*" element={<NotFound />} />
   </Routes>
-
-  <ToastContainer position="top-center" autoClose={3000} />
+  <ToastContainer position="top-center" autoClose={3000} /> 
+  
 </>
   );
 }

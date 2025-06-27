@@ -32,7 +32,7 @@ export function BookForm() {
     form.append("summary", formData.summary);
     if (coverImage) form.append("cover_image", coverImage);
 
-    const res = await fetch("http://localhost:5000/books", {
+    const res = await fetch("http://localhost:5000/books/books", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`, // Don't set Content-Type manually

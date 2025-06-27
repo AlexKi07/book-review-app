@@ -10,20 +10,23 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
     const storedUser = localStorage.getItem('user');
-
-    if (token && storedUser) {
+  
+    if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
+        if (parsedUser.access_token) {
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+        } else {
+          throw new Error('Missing access token');
+        }
       } catch (error) {
         console.error('Failed to parse stored user:', error);
         logout(); 
       }
     }
-
+  
     setIsLoadingAuth(false);
   }, []);
 
@@ -35,19 +38,24 @@ export const AuthProvider = ({ children }) => {
         credentials: 'include',
         body: JSON.stringify({ email, password }),
       });
-
+  
       if (!response.ok) throw new Error('Login failed');
       const data = await response.json();
-
+  
       if (!data.access_token || !data.user) {
         throw new Error('Invalid response from server');
       }
-
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token || '');
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      setUser(data.user);
+  
+      // ✅ Merge tokens with user and store a single object
+      const fullUserData = {
+        ...data.user,
+        access_token: data.access_token,
+        refresh_token: data.refresh_token || ''
+      };
+  
+      localStorage.setItem('user', JSON.stringify(fullUserData));
+  
+      setUser(fullUserData);
       setIsAuthenticated(true);
       return true;
     } catch (error) {
@@ -55,15 +63,15 @@ export const AuthProvider = ({ children }) => {
       return false;
     }
   };
+  
 
   const logout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
     navigate('/login');
   };
+  
 
   return (
     <AuthContext.Provider

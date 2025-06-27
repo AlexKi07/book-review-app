@@ -1,11 +1,13 @@
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.models import User, db
-from flask_jwt_extended import jwt_required, get_jwt_identity, verify_jwt_in_request
 
 users = Blueprint('users', __name__)
 
 
 @users.route('/users', methods=['GET'])
+@cross_origin(origins=["http://localhost:5173"], supports_credentials=True)
 @jwt_required()
 def get_all_users():
     current_user_id = get_jwt_identity()
@@ -29,12 +31,15 @@ def get_all_users():
 
 
 @users.route('/users/<int:user_id>', methods=['GET'])
+@cross_origin(origins=["http://localhost:5173"], supports_credentials=True)
 @jwt_required()
 def get_user(user_id):
     user = User.query.get_or_404(user_id)
     return jsonify(user.to_json()), 200
 
+
 @users.route('/users/<int:user_id>', methods=['PUT'])
+@cross_origin(origins=["http://localhost:5173"], supports_credentials=True, methods=["PUT", "OPTIONS"])
 @jwt_required()
 def update_user_by_id(user_id):
     current_user_id = get_jwt_identity()
@@ -68,57 +73,50 @@ def update_user_by_id(user_id):
 
 
 @users.route('/me', methods=['OPTIONS', 'GET', 'PATCH'])
+@cross_origin(
+    origins=["http://localhost:5173"],
+    supports_credentials=True,
+    methods=["GET", "PATCH", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"]
+)
 @jwt_required()
 def current_user():
-    print(">>> /users/me route hit")
-
     if request.method == 'OPTIONS':
         return '', 204
 
     try:
         user_id = get_jwt_identity()
-        print(">>> JWT identity:", user_id)
 
         if not user_id:
             return jsonify({"error": "No user identity found in token"}), 401
 
         user = User.query.get(user_id)
         if not user:
-            print(">>> User not found in database")
             return jsonify({"error": "User not found"}), 404
-
-        print(f">>> Retrieved user: {user.username}")
 
         if request.method == 'PATCH':
             data = request.get_json()
-            print(">>> Incoming PATCH data:", data)
 
             if 'username' in data:
                 if User.query.filter(User.username == data['username'], User.id != user_id).first():
                     return jsonify({"error": "Username taken"}), 400
 
             allowed_fields = ['username', 'email', 'bio', 'profile_picture', 'favorite_genres']
-            updates = {k: data[k] for k in allowed_fields if k in data}
-
-            for key, value in updates.items():
-                setattr(user, key, value)
+            for key in allowed_fields:
+                if key in data:
+                    setattr(user, key, data[key])
 
             db.session.commit()
-            print(">>> User updated successfully")
             return jsonify(user.to_json()), 200
 
-        # For GET
-        user_data = user.to_json()
-        print(">>> Returning user data:", user_data)
-        return jsonify(user_data), 200
+        return jsonify(user.to_json()), 200
 
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return jsonify({"error": f"Server error: {str(e)}"}), 500
 
 
 @users.route('/users/<int:user_id>/ban', methods=['POST'])
+@cross_origin(origins=["http://localhost:5173"], supports_credentials=True)
 @jwt_required()
 def ban_user(user_id):
     current_user_id = get_jwt_identity()
@@ -140,11 +138,17 @@ def ban_user(user_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+
 @users.route('/users/<int:user_id>/unban', methods=['OPTIONS', 'POST'])
+@cross_origin(
+    origins=["http://localhost:5173"],
+    supports_credentials=True,
+    methods=["POST", "OPTIONS"]
+)
 @jwt_required()
 def unban_user(user_id):
     if request.method == 'OPTIONS':
-        return '', 204  # Respond to CORS preflight
+        return '', 204
 
     current_user_id = get_jwt_identity()
     current_user = User.query.get(current_user_id)
@@ -164,5 +168,3 @@ def unban_user(user_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
-
