@@ -18,8 +18,10 @@ auth = Blueprint('auth', __name__)
 
 EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
 
-
-
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://book-review-app-psi.vercel.app"
+]
 
 def validate_input(data, required_fields):
     missing = [field for field in required_fields if not data.get(field)]
@@ -34,29 +36,28 @@ def validate_input(data, required_fields):
         
     return True, None
 
-
 def add_token_to_blacklist(jti):
     expires_at = datetime.now(timezone.utc) + current_app.config['JWT_ACCESS_TOKEN_EXPIRES']
     redis_client.setex(f"token:{jti}", int(current_app.config['JWT_ACCESS_TOKEN_EXPIRES'].total_seconds()), "revoked")
-
 
 def is_token_revoked(jwt_payload):
     jti = jwt_payload["jti"]
     return redis_client.exists(f"token:{jti}") > 0
 
-
+def set_cors_headers(response):
+    origin = request.headers.get("Origin")
+    if origin in ALLOWED_ORIGINS:
+        response.headers.add("Access-Control-Allow-Origin", origin)
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        response.headers.add("Access-Control-Allow-Methods", "POST,OPTIONS")
+    return response
 
 
 @auth.route('/register', methods=['POST', 'OPTIONS'])
 def register():
     if request.method == 'OPTIONS':
-        response = jsonify({})
-        response.status_code = 204
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-        return response
+        return set_cors_headers(jsonify({})), 204
 
     if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
@@ -98,17 +99,14 @@ def register():
         except Exception as e:
             current_app.logger.error(f"Failed to send welcome email: {str(e)}")
 
-    return jsonify({"message": "User registered successfully"}), 201
+    response = jsonify({"message": "User registered successfully"})
+    return set_cors_headers(response), 201
+
 
 @auth.route('/login', methods=['POST', 'OPTIONS'])
 def login():
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'preflight'})
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'POST,OPTIONS')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response
+        return set_cors_headers(jsonify({'status': 'preflight'})), 204
 
     if not request.is_json:
         return jsonify({"error": "Request must be JSON"}), 400
@@ -185,20 +183,7 @@ def login():
         }
 
         response = jsonify(response_data)
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-
-        if current_app.config.get('ENV', '').lower() == 'production':
-            response.set_cookie(
-                'access_token_cookie',
-                value=access_token,
-                httponly=True,
-                secure=True,
-                samesite='Lax',
-                max_age=int(expires_delta.total_seconds())
-            )
-
-        return response
+        return set_cors_headers(response)
 
     except Exception as e:
         current_app.logger.error(f"Login error: {str(e)}")
