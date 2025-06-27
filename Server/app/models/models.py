@@ -45,7 +45,7 @@ class Book(db.Model):
     author = db.Column(db.String(100), nullable=False)
     genre = db.Column(db.String(50))
     summary = db.Column(db.Text)
-    cover_image = db.Column(db.String(255))
+    cover_image = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     reviews = db.relationship('Review', back_populates='book', cascade='all, delete-orphan')
