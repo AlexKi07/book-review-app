@@ -38,31 +38,31 @@ Live Database: (postgresql://br_db_user:y05C1UCEXj5nD5rsxGHbXcFXorBXAqiq@dpg-d1f
 ## How To Initialise
 1. Clone the Repository
 
-   git clone https://github.com/AlexKi07/book-review-app.git
+   git clone https://github.com/AlexKi07/book-review-app.git,
     cd book-review-app
 
 3. Set up Backend
 
-    cd Server
-    pipenv install
+    cd Server,
+    pipenv install,
     pipenv shell
 
 3. Database
     
-    flask db upgrade     
-    python seed.py        
+    flask db upgrade,  
+    python seed.py,       
     flask run 
 
 4. Set upthe  frontend
     
-    cd Client
-    npm install
-    -Create .env file
-    VITE_API_URL=http://localhost:5000
+    cd Client,
+    npm install,
+    -Create .env file,
+    VITE_API_URL=http://localhost:5000,
     npm run dev
 
 5. App is ready. Enjoy!!
-      Visit: http://localhost:5173
+      Visit: http://localhost:5173,
       Backend API: http://localhost:5000
 
 
