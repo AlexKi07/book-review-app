@@ -18,8 +18,6 @@ function Navbar({ isLoggedIn, user, onLogout }) {
           ...(user?.is_admin
             ? [
                 { to: "/admin", label: "Admin" },
-                { to: "/admin/users", label: "Users" },
-                { to: "/admin/books", label: "Books" },
               ]
             : []),
         ]

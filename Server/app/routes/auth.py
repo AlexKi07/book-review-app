@@ -69,7 +69,6 @@ def register():
     if not data['username'].strip():
         return jsonify({"error": "Username cannot be empty"}), 400
 
-    # ✅ Check for duplicate email BEFORE attempting insert
     if User.query.filter_by(email=data['email']).first():
         return jsonify({"error": "Email already registered"}), 409
 

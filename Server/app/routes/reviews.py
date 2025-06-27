@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from app.models.models import Review, db
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.models.models import Review, User, db
 
 reviews = Blueprint('reviews', __name__)
 
@@ -21,10 +21,9 @@ def update_review(review_id):
     user_id = get_jwt_identity()
     if review.user_id != user_id:
         return jsonify({"msg": "Not authorized"}), 403
-    
+
     data = request.json
     review.content = data['content']
-
     db.session.commit()
     return jsonify({"msg": "Review updated!"})
 
@@ -35,10 +34,25 @@ def delete_review(review_id):
     user_id = get_jwt_identity()
     if review.user_id != user_id:
         return jsonify({"msg": "Not authorized"}), 403
-    
+
     db.session.delete(review)
     db.session.commit()
     return jsonify({"msg": "Review removed!"})
+
+@reviews.route('/admin/reviews/<int:review_id>', methods=['DELETE'])
+@jwt_required()
+def admin_delete_review(review_id):
+    user_id = get_jwt_identity()
+    user = User.query.get_or_404(user_id)
+
+    if not user.is_admin:
+        return jsonify({"msg": "Admin access required"}), 403
+
+    review = Review.query.get_or_404(review_id)
+
+    db.session.delete(review)  
+    db.session.commit()
+    return jsonify({"msg": "Review and comments deleted by admin"})
 
 @reviews.route('/reviews', methods=['GET'])
 def get_all_reviews():
@@ -53,4 +67,9 @@ def get_all_reviews():
 @reviews.route('/reviews/<int:review_id>', methods=['GET'])
 def get_single_review(review_id):
     review = Review.query.get_or_404(review_id)
-    return jsonify({"id": review.id, "content": review.content, "book_id": review.book_id, "user_id": review.user_id})
+    return jsonify({
+        "id": review.id,
+        "content": review.content,
+        "book_id": review.book_id,
+        "user_id": review.user_id
+    })

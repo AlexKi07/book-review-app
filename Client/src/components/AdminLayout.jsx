@@ -1,4 +1,4 @@
-// src/components/AdminLayout.jsx
+
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 

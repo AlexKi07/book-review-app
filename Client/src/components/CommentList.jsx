@@ -1,4 +1,4 @@
-// CommentList.jsx
+
 import React from "react";
 
 function CommentList({ comments }) {

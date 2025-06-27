@@ -1,4 +1,4 @@
-// src/components/BookCard.jsx
+
 import { useNavigate } from "react-router-dom";
 
 function BookCard({ book }) {

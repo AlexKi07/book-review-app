@@ -9,11 +9,10 @@ migrate = Migrate()
 mail = Mail()
 jwt = JWTManager()
 
-# Initialize Redis client
 redis_client = redis.Redis(
-    host='localhost',  # or your Redis server host
-    port=6379,        # default Redis port
-    db=0,             # default database
+    host='localhost',  
+    port=6379,        
+    db=0,             
     decode_responses=True
 )
 jwt_blacklist = set()

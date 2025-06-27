@@ -10,7 +10,7 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [inactivityTimer, setInactivityTimer] = useState(null);
-  const isMounted = useRef(true); // ✅ track mount state
+  const isMounted = useRef(true); 
 
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -27,7 +27,7 @@ function LoginForm() {
         toast.info('You have been logged out due to inactivity');
         navigate('/login');
       }
-    }, 1800000); // 30 minutes
+    }, 1800000); 
 
     setInactivityTimer(timer);
   };
