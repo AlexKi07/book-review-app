@@ -1,6 +1,6 @@
 // src/api.js
 
-const API_BASE = "http://127.0.0.1:5000";
+const API_BASE = "https://book-review-app-kgew.onrender.com";
 
 function getToken() {
   return localStorage.getItem("token");
