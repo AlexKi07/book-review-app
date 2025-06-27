@@ -41,10 +41,6 @@ export default function HomePage() {
           </div>
         </section>
       </main>
-
-      <footer className="bg-white text-center py-4 mt-10 text-sm text-gray-500 border-t">
-        © {new Date().getFullYear()} BookNook. All rights reserved.
-      </footer>
     </div>
   );
 }

@@ -42,8 +42,17 @@ export default function FooterPage() {
 
         <hr className="my-8 border-gray-600" />
 
-        <div className="text-center text-xs text-gray-400">
-          &copy; {new Date().getFullYear()} ReviewCorner. All rights reserved.
+        {/* Bottom bar */}
+        <div className="text-center text-xs text-gray-400 space-y-1">
+          <p>&copy; {new Date().getFullYear()} ReviewCorner. All rights reserved.</p>
+          <a
+            href="/LICENSE"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white underline"
+          >
+            View License
+          </a>
         </div>
       </div>
     </footer>
